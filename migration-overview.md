@@ -19,6 +19,12 @@ To migrate data from MySQL to TiDB, it is recommended to use one of the followin
 - [Use Dumpling and TiDB Lightning](#use-dumpling-and-tidb-lightning-full-data) to migrate full data.
 - [Use TiDB Data Migration (DM)](#use-dm) to migrate full and incremental data.
 
+## Migrate from Vitess to TiDB
+
+To migrate data from Vitess to TiDB the follwing guid is available:
+
+- [Migrate from Vitess to TiDB](/migrate-from-vitess.md)
+
 ### Use Dumpling and TiDB Lightning (full data)
 
 #### Scenarios

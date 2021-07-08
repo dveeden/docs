@@ -21,7 +21,7 @@ When your are not using Kubernetes to deploy on a cloud service you can still us
 
 Another common option is to use a software based loadbalancer. Common ones are ProxySQL, haproxy and MySQL Router.
 
-The last type of loadbalancer that we will discuss here is hardware based loadbalancers. These are physical machines where you plug in a network cable. These are often costly, but also offer a high throughput.
+The last type of loadbalancing that we will discuss here is hardware based loadbalancers. These are physical machines where you plug in a network cable. These are often costly, but also offer a high throughput.
 
 ## General loadbalancing requirements for TiDB
 

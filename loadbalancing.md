@@ -39,7 +39,7 @@ For software based loadbalancers you have the option to put your loadbalancer on
 
 Installing the loadbalancer on the same hosts as a _sidecar_ to your application is good for performance as it doesn't need an extra network hop. However having to adminster many instances of your loadbalancing software makes this slightly more complicated to administer.
 
-Putting the loadbalancer on separate machines may be less performant as it needs an extra network hop and depending on your traffic may become a choke-point. However for administration this is might be easier.
+Installing the loadbalancer on separate hosts will typically increase latency as an extra network hop is required. There is also risk that (depending on your network) connectivity to and from the load balancer could become saturated. However, this method is less complicated to administer.
 
 Don't forget to include High-Availablility in your decision. With the first setup an unavailable loadbalancer only impacts a single application host. With the second solution you probably have to take some steps to make your loadbalancer software high-available, which complicates the configuration.
 

@@ -37,7 +37,7 @@ Health checks that check for `read_only` or other MySQL or InnoDB variables shou
 
 For software based loadbalancers you have the option to put your loadbalancer on the same hosts as your application or on separate hosts. Both have their own benefits.
 
-Putting the loadbalancer on the same hosts as your application is good for performance as it doesn't need an extra network hop. However having to adminster many instances of your loadbalancing software makes this slightly more complicated to administer.
+Installing the loadbalancer on the same hosts as a _sidecar_ to your application is good for performance as it doesn't need an extra network hop. However having to adminster many instances of your loadbalancing software makes this slightly more complicated to administer.
 
 Putting the loadbalancer on separate machines may be less performant as it needs an extra network hop and depending on your traffic may become a choke-point. However for administration this is might be easier.
 

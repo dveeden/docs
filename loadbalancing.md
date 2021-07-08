@@ -23,7 +23,7 @@ Another common option is to use a software based loadbalancer. Common ones are P
 
 The last type of loadbalancer that we will discuss here is hardware based loadbalancers. These are physical machines where you plug in a network cable. These are often costly, but also offer a high throughput.
 
-## General loadbalancer requirements for TiDB
+## General loadbalancing requirements for TiDB
 
 Where loadbalancers may offer advanced features like read/write splitting for MySQL, this is not needed for TiDB. The loadbalancer does not need to be able to inspect the MySQL protocol. A TCP level loadbalacer works fine for TiDB.
 

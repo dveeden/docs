@@ -41,7 +41,7 @@ Installing the loadbalancer on the same hosts as a _sidecar_ to your application
 
 Installing the loadbalancer on separate hosts will typically increase latency as an extra network hop is required. There is also risk that (depending on your network) connectivity to and from the load balancer could become saturated. However, this method is less complicated to administer.
 
-Don't forget to include High-Availablility in your decision. With the first setup an unavailable loadbalancer only impacts a single application host. With the second solution you probably have to take some steps to make your loadbalancer software high-available, which complicates the configuration.
+High availability is also an important consideration when deciding between these options. With the first setup an unavailable loadbalancer only impacts a single application host. With the second solution you probably have to take some steps to make your loadbalancer software high-available, which complicates the configuration.
 
 ## Testing loadbalancing
 

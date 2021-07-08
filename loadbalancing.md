@@ -7,7 +7,7 @@ summary: How to use loadbalancing with TiDB
 
 Loadbalancing is used to distribute connections from applications to TiDB Server instances. This helps to distribute the load over multiple machines and (depending on the loadbalancing option selected) can automatically re-route connections should a TiDB instance become unavailable.
 
-## Loadbalancer types
+## Loadbalancing types
 
 The first type of loadbalancer that is available is *connector based loadbalancing*. Many of the MySQL connectors like MySQL Connector/J and MySQL Connector/C++. The benefits from this is that there is that there is no extra network hop and the application has more information about which server it is connected to. The drawback of this is that there is no central administration and when changing the configuration you have to do this on all your application hosts. Depending on the programming language you are using the loadbalancing may not be available or not offer more advanced options. This can work with most third-party applications as this is often configured in the connection string (JDBC url for Java for example).
 

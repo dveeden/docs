@@ -5,7 +5,7 @@ summary: How to use loadbalancing with TiDB
 
 # Loadbalancing
 
-A loadbalancer is needed to route connections from your application(s) to a TiDB instance. This helps to distribute the load over multiple machines and also makes sure your application will be able to connect to another TiDB instance if an instance is unavailable for any reason.
+Loadbalancing is used to distribute connections from applications to TiDB Server instances. This helps to distribute the load over multiple machines and (depending on the loadbalancing option selected) can automatically re-route connections should a TiDB instance become unavailable.
 
 ## Loadbalancer types
 

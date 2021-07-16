@@ -15,7 +15,7 @@ TiDB supports similar security functionality to MySQL 5.7, with the following ex
 
 ## Authentication plugin status
 
-Authentication in TiDB supports multiple authentication methods. The authentication method can be specified on a per user basis with [`CREATE USER`](/sql-statements/sql-statement-create-user.md) and [`ALTER USER`](/sql-statements/sql-statement-create-user.md). These authentication methods are compatible with the authentication methods of MySQL with the same name.
+TiDB supports multiple authentication methods. These methods can be specified on a per user basis using [`CREATE USER`](/sql-statements/sql-statement-create-user.md) and [`ALTER USER`](/sql-statements/sql-statement-create-user.md). These methods are compatible with the authentication methods of MySQL with the same names.
 
 The default authentication method the server advertises during connection establishment can be set with the [`default_authentication_format`](/system-variables.md#default_authentication_format).
 

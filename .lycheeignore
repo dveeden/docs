@@ -41,3 +41,5 @@ https://.*github.*/%7B%7B%7B.tidb-operator-version%7D%7D%7D'
 https://portal\.azure\.com/.*
 https://azuremarketplace\.microsoft\.com/.*
 https://one\.newrelic\.com/.*
+https://tidbcloud\.com/.*
+

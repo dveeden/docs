@@ -8,7 +8,8 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/pingcap/tidb/sessionctx/variable"
+	"github.com/pingcap/tidb/pkg/sessionctx/vardef"
+	"github.com/pingcap/tidb/pkg/sessionctx/variable"
 )
 
 func fmtDuration(d time.Duration) string {
@@ -32,27 +33,27 @@ func ByteCountIEC(s string) string {
 
 func formatDefaultValue(sv *variable.SysVar) string {
 	switch sv.Name {
-	case variable.SystemTimeZone:
+	case vardef.SystemTimeZone:
 		return "(system dependent)"
-	case variable.Hostname:
+	case vardef.Hostname:
 		return "(system hostname)"
-	case variable.Version:
+	case vardef.Version:
 		return "`5.7.25-TiDB-`(tidb version)"
-	case variable.VersionComment, "version_compile_machine", "version_compile_os":
+	case vardef.VersionComment, "version_compile_machine", "version_compile_os":
 		return "(string)"
-	case variable.TiDBEnable1PC, variable.TiDBEnableAsyncCommit:
+	case vardef.TiDBEnable1PC, vardef.TiDBEnableAsyncCommit:
 		return "`ON`" // These are OFF in the source, which is for OLD versions. For NEW its on.
-	case variable.TiDBRowFormatVersion:
+	case vardef.TiDBRowFormatVersion:
 		return "`2`" // Same story, for old clusters it is 1.
-	case variable.TiDBTxnMode:
+	case vardef.TiDBTxnMode:
 		return "`pessimistic`"
-	case variable.TiDBMemQuotaApplyCache, variable.TiDBMemQuotaQuery, variable.TiDBQueryLogMaxLen, variable.TiDBBCJThresholdSize:
+	case vardef.TiDBMemQuotaApplyCache, vardef.TiDBMemQuotaQuery, vardef.TiDBQueryLogMaxLen, vardef.TiDBBCJThresholdSize:
 		return fmt.Sprintf("`%s` (%s)", sv.Value, ByteCountIEC(sv.Value))
-	case variable.DataDir:
+	case vardef.DataDir:
 		return "/tmp/tidb"
-	case variable.LastInsertID:
+	case vardef.LastInsertID:
 		return "`0`"
-	case variable.PluginDir:
+	case vardef.PluginDir:
 		return `""`
 	}
 	if sv.Value == "" {
@@ -68,59 +69,57 @@ func skipSv(sv *variable.SysVar) bool {
 	}
 	// These svs have no documentation yet.
 	switch sv.Name {
-	case variable.ErrorCount, // doesn't work correctly
-		variable.MaxPreparedStmtCount,
-		variable.TiDBBatchCommit,
-		variable.TiDBBatchDelete,
-		variable.TiDBEnableChangeMultiSchema, // feature flag
-		variable.TiDBEnableExchangePartition, // feature flag
-		variable.TiDBEnableExtendedStats,     // feature flag
-		variable.TiDBEnableHistoricalStats,   // feature flag
-		variable.TiDBEnableIndexMergeJoin,
-		variable.TiDBEnableLocalTxn,          // feature flag
-		variable.TiDBEnableOrderedResultMode, // no current plans to document
-		variable.TiDBEnablePipelinedWindowFunction,
-		variable.TiDBEnablePointGetCache,
-		variable.TiDBGuaranteeLinearizability,
-		variable.TiDBHashExchangeWithNewCollation,
-		variable.TiDBLastQueryInfo,
-		variable.TiDBLastTxnInfo,
-		variable.TiDBMergeJoinConcurrency,
-		variable.TiDBMPPStoreFailTTL,
-		variable.TiDBOptCartesianBCJ,
-		variable.TiDBOptConcurrencyFactor,
-		variable.TiDBOptCopCPUFactor,
-		variable.TiDBOptCPUFactor,
-		variable.TiDBOptDescScanFactor,
-		variable.TiDBOptDiskFactor,
-		variable.TiDBOptimizerSelectivityLevel,
-		variable.TiDBOptJoinReorderThreshold,
-		variable.TiDBOptMemoryFactor,
-		variable.TiDBOptMPPOuterJoinFixedBuildSide,
-		variable.TiDBOptNetworkFactor,
-		variable.TiDBOptScanFactor,
-		variable.TiDBOptSeekFactor,
-		variable.TiDBOptTiFlashConcurrencyFactor,
-		variable.TiDBShardAllocateStep,
-		variable.TiDBStreamAggConcurrency,
-		variable.TiDBTrackAggregateMemoryUsage,
-		variable.TiDBTxnReadTS,
-		variable.TiDBTxnScope,
-		variable.TxnIsolationOneShot,
-		variable.TiDBSuperReadOnly,
-		variable.TiDBReadConsistency,
-		variable.TiDBLastDDLInfo,
-		variable.TiDBOptimizerEnableNewOnlyFullGroupByCheck,
-		variable.TiDBBatchPendingTiFlashCount,
-		variable.TiDBGCMaxWaitTime,
-		variable.TiDBRemoveOrderbyInSubquery,
-		variable.TiDBTxnCommitBatchSize,
-		variable.TiDBOptProjectionPushDown,
-		variable.TiDBEnableNewCostInterface,
-		variable.TiDBStatsCacheMemQuota,
-		variable.TiDBMaxTiFlashThreads,
-		variable.TiDBMemQuotaAnalyze,
-		variable.TiDBNonTransactionalIgnoreError:
+	case vardef.ErrorCount, // doesn't work correctly
+		vardef.MaxPreparedStmtCount,
+		vardef.TiDBBatchCommit,
+		vardef.TiDBBatchDelete,
+		vardef.TiDBEnableExchangePartition, // feature flag
+		vardef.TiDBEnableExtendedStats,     // feature flag
+		vardef.TiDBEnableHistoricalStats,   // feature flag
+		vardef.TiDBEnableIndexMergeJoin,
+		vardef.TiDBEnableLocalTxn,          // feature flag
+		vardef.TiDBEnableOrderedResultMode, // no current plans to document
+		vardef.TiDBEnablePipelinedWindowFunction,
+		vardef.TiDBEnablePointGetCache,
+		vardef.TiDBGuaranteeLinearizability,
+		vardef.TiDBHashExchangeWithNewCollation,
+		vardef.TiDBLastQueryInfo,
+		vardef.TiDBLastTxnInfo,
+		vardef.TiDBMergeJoinConcurrency,
+		vardef.TiDBMPPStoreFailTTL,
+		vardef.TiDBOptCartesianBCJ,
+		vardef.TiDBOptConcurrencyFactor,
+		vardef.TiDBOptCopCPUFactor,
+		vardef.TiDBOptCPUFactor,
+		vardef.TiDBOptDescScanFactor,
+		vardef.TiDBOptDiskFactor,
+		vardef.TiDBOptimizerSelectivityLevel,
+		vardef.TiDBOptJoinReorderThreshold,
+		vardef.TiDBOptMemoryFactor,
+		vardef.TiDBOptMPPOuterJoinFixedBuildSide,
+		vardef.TiDBOptNetworkFactor,
+		vardef.TiDBOptScanFactor,
+		vardef.TiDBOptSeekFactor,
+		vardef.TiDBOptTiFlashConcurrencyFactor,
+		vardef.TiDBShardAllocateStep,
+		vardef.TiDBStreamAggConcurrency,
+		vardef.TiDBTrackAggregateMemoryUsage,
+		vardef.TiDBTxnReadTS,
+		vardef.TxnIsolationOneShot,
+		vardef.TiDBSuperReadOnly,
+		vardef.TiDBReadConsistency,
+		vardef.TiDBLastDDLInfo,
+		vardef.TiDBOptimizerEnableNewOnlyFullGroupByCheck,
+		vardef.TiDBBatchPendingTiFlashCount,
+		vardef.TiDBGCMaxWaitTime,
+		vardef.TiDBRemoveOrderbyInSubquery,
+		vardef.TiDBTxnCommitBatchSize,
+		vardef.TiDBOptProjectionPushDown,
+		vardef.TiDBEnableNewCostInterface,
+		vardef.TiDBStatsCacheMemQuota,
+		vardef.TiDBMaxTiFlashThreads,
+		vardef.TiDBMemQuotaAnalyze,
+		vardef.TiDBNonTransactionalIgnoreError:
 
 		return true
 	}
@@ -130,37 +129,37 @@ func skipSv(sv *variable.SysVar) bool {
 func printWarning(sv *variable.SysVar) string {
 
 	switch sv.Name {
-	case variable.TiDBHashJoinConcurrency, variable.TiDBHashAggFinalConcurrency, variable.TiDBHashAggPartialConcurrency,
-		variable.TiDBIndexLookupConcurrency, variable.TiDBIndexLookupJoinConcurrency, variable.TiDBWindowConcurrency, variable.TiDBProjectionConcurrency:
+	case vardef.TiDBHashJoinConcurrency, vardef.TiDBHashAggFinalConcurrency, vardef.TiDBHashAggPartialConcurrency,
+		vardef.TiDBIndexLookupConcurrency, vardef.TiDBIndexLookupJoinConcurrency, vardef.TiDBWindowConcurrency, vardef.TiDBProjectionConcurrency:
 		return "> **Warning:**\n>\n> Since v5.0, this variable is deprecated. Instead, use [`tidb_executor_concurrency`](#tidb_executor_concurrency-new-in-v50) for setting.\n\n"
-	case variable.TiDBEnableListTablePartition:
+	case vardef.TiDBEnableListTablePartition:
 		return "> **Warning:**\n>\n> Currently, List partition and List COLUMNS partition are experimental features. It is not recommended that you use it in production environments.\n\n"
-	case variable.TiDBGCScanLockMode:
+	case vardef.TiDBGCScanLockMode:
 		return "> **Warning:**\n>\n> Currently, Green GC is an experimental feature. It is not recommended that you use it in production environments.\n\n"
-	case variable.TiDBPartitionPruneMode:
+	case vardef.TiDBPartitionPruneMode:
 		return "> **Warning:**\n\n> Currently, the dynamic pruning mode for partitioned tables is an experimental feature. It is not recommended that you use it in production environments.\n\n"
-	case variable.TiDBEnableCascadesPlanner:
+	case vardef.TiDBEnableCascadesPlanner:
 		return "> **Warning:**\n>\n> Currently, cascades planner is an experimental feature. It is not recommended that you use it in production environments.\n\n"
-	case variable.TiDBEnableFastAnalyze:
+	case vardef.TiDBEnableFastAnalyze:
 		return "> **Warning:**\n>\n> Currently, `Fast Analyze` is an experimental feature. It is not recommended that you use it in production environments.\n\n"
-	case variable.TiDBEnableColumnTracking:
+	case vardef.TiDBEnableColumnTracking:
 		return "> **Warning:**\n>\n> Currently, collecting statistics on `PREDICATE COLUMNS` is an experimental feature. It is not recommended that you use it in production environments.\n\n"
-	case variable.TiDBEnableTopSQL:
+	case vardef.TiDBEnableTopSQL:
 		return "> **Warning:**\n>\n> Currently, Top SQL is an experimental feature. It is not recommended that you use it for production environments.\n\n"
-	case variable.TiDBStatsLoadSyncWait, variable.TiDBStatsLoadPseudoTimeout:
+	case vardef.TiDBStatsLoadSyncWait, vardef.TiDBStatsLoadPseudoTimeout:
 		return "> **Warning:**\n>\n> Currently, synchronously loading statistics is an experimental feature. It is not recommended that you use it in production environments.\n\n"
-	case variable.TiDBEnableIndexMerge:
+	case vardef.TiDBEnableIndexMerge:
 		return "> **Note:**\n>\n" +
 			"> - After upgrading a TiDB cluster from versions earlier than v4.0.0 to v5.4.0 or later, this variable is disabled by default to prevent performance regression due to changes of execution plans.\n" +
 			">\n" +
 			"> - After upgrading a TiDB cluster from v4.0.0 or later to v5.4.0 or later, this variable remains the setting before the upgrade.\n" +
 			">\n" +
 			"> - Since v5.4.0, for a newly deployed TiDB cluster, this variable is enabled by default.\n\n"
-	case variable.TiDBRCReadCheckTS:
+	case vardef.TiDBRCReadCheckTS:
 		return "> **Warning:**\n>\n" +
 			"> - This feature is incompatible with [`replica-read`](#tidb_replica_read-new-in-v40). Do not enable `tidb_rc_read_check_ts` and `replica-read` at the same time.\n" +
 			"> - If your client uses a cursor, it is not recommended to enable `tidb_rc_read_check_ts` in case that the previous batch of returned data has already been used by the client and the statement eventually fails.\n\n"
-	case variable.TiDBTopSQLMaxTimeSeriesCount:
+	case vardef.TiDBTopSQLMaxTimeSeriesCount:
 		return "> **Note:**\n>\n" +
 			"> Currently, the Top SQL page in TiDB Dashboard only displays the top 5 types of SQL queries that contribute the most to the load, which is irrelevant with the configuration of `tidb_top_sql_max_time_series_count`.\n\n"
 	}
@@ -169,25 +168,25 @@ func printWarning(sv *variable.SysVar) string {
 
 func printUnits(sv *variable.SysVar) string {
 	switch sv.Name {
-	case variable.TiDBMemQuotaApplyCache, variable.TiDBMemQuotaQuery, variable.TiDBQueryLogMaxLen,
-		variable.TiDBBCJThresholdSize, variable.MaxAllowedPacket, variable.TiDBTmpTableMaxSize,
-		variable.TiDBMemQuotaBindingCache:
+	case vardef.TiDBMemQuotaApplyCache, vardef.TiDBMemQuotaQuery, vardef.TiDBQueryLogMaxLen,
+		vardef.TiDBBCJThresholdSize, vardef.MaxAllowedPacket, vardef.TiDBTmpTableMaxSize,
+		vardef.TiDBMemQuotaBindingCache:
 		return "- Unit: Bytes\n"
-	case variable.TiDBSlowLogThreshold, variable.MaxExecutionTime, variable.TiDBDDLSlowOprThreshold,
-		variable.TiDBStatsLoadSyncWait:
+	case vardef.TiDBSlowLogThreshold, vardef.MaxExecutionTime, vardef.TiDBDDLSlowOprThreshold,
+		vardef.TiDBStatsLoadSyncWait:
 		return "- Unit: Milliseconds\n"
-	case variable.InteractiveTimeout, variable.WaitTimeout, variable.TiDBStmtSummaryRefreshInterval, variable.TiDBWaitSplitRegionTimeout, variable.InnodbLockWaitTimeout,
-		variable.TiDBMetricSchemaRangeDuration, variable.TiDBMetricSchemaStep, variable.TiDBEvolvePlanTaskMaxTime,
-		variable.TiDBExpensiveQueryTimeThreshold, variable.TiDBTableCacheLease:
+	case vardef.InteractiveTimeout, vardef.WaitTimeout, vardef.TiDBStmtSummaryRefreshInterval, vardef.TiDBWaitSplitRegionTimeout, vardef.InnodbLockWaitTimeout,
+		vardef.TiDBMetricSchemaRangeDuration, vardef.TiDBMetricSchemaStep, vardef.TiDBEvolvePlanTaskMaxTime,
+		vardef.TiDBExpensiveQueryTimeThreshold, vardef.TiDBTableCacheLease:
 		return "- Unit: Seconds\n"
-	case variable.SQLSelectLimit, variable.TiDBBCJThresholdCount, variable.TiDBDDLReorgBatchSize,
-		variable.TiDBDMLBatchSize, variable.TiDBIndexJoinBatchSize, variable.TiDBIndexLookupSize,
-		variable.TiDBInitChunkSize, variable.TiDBMaxChunkSize:
+	case vardef.SQLSelectLimit, vardef.TiDBBCJThresholdCount, vardef.TiDBDDLReorgBatchSize,
+		vardef.TiDBDMLBatchSize, vardef.TiDBIndexJoinBatchSize, vardef.TiDBIndexLookupSize,
+		vardef.TiDBInitChunkSize, vardef.TiDBMaxChunkSize:
 		return "- Unit: Rows\n"
-	case variable.TiDBBuildStatsConcurrency, variable.TiDBChecksumTableConcurrency, variable.TiDBDDLReorgWorkerCount,
-		variable.TiDBDistSQLScanConcurrency, variable.TiDBExecutorConcurrency, variable.TiDBGCConcurrency, variable.TiDBHashJoinConcurrency,
-		variable.TiDBHashAggFinalConcurrency, variable.TiDBHashAggPartialConcurrency, variable.TiDBIndexLookupConcurrency, variable.TiDBIndexLookupJoinConcurrency,
-		variable.TiDBIndexSerialScanConcurrency, variable.TiDBProjectionConcurrency, variable.TiDBWindowConcurrency:
+	case vardef.TiDBBuildStatsConcurrency, vardef.TiDBChecksumTableConcurrency, vardef.TiDBDDLReorgWorkerCount,
+		vardef.TiDBDistSQLScanConcurrency, vardef.TiDBExecutorConcurrency, vardef.TiDBGCConcurrency, vardef.TiDBHashJoinConcurrency,
+		vardef.TiDBHashAggFinalConcurrency, vardef.TiDBHashAggPartialConcurrency, vardef.TiDBIndexLookupConcurrency, vardef.TiDBIndexLookupJoinConcurrency,
+		vardef.TiDBIndexSerialScanConcurrency, vardef.TiDBProjectionConcurrency, vardef.TiDBWindowConcurrency:
 		return "- Unit: Threads\n"
 	}
 	return ""
@@ -215,56 +214,54 @@ func formatPossibleValues(sv *variable.SysVar) string {
 
 func formatSpecialVersionComment(sv *variable.SysVar) string {
 	switch sv.Name {
-	case variable.TiDBAllowAutoRandExplicitInsert:
+	case vardef.TiDBAllowAutoRandExplicitInsert:
 		return ` <span class="version-mark">New in v4.0.3</span>`
-	case variable.TiDBFoundInPlanCache, variable.TiDBFoundInBinding, variable.TiDBCapturePlanBaseline, variable.TiDBEnableChunkRPC,
-		variable.TiDBEnableIndexMerge, variable.TiDBEnableNoopFuncs, variable.TiDBEnableVectorizedExpression, variable.TiDBAllowBatchCop,
-		variable.TiDBEvolvePlanBaselines, variable.TiDBEvolvePlanTaskMaxTime, variable.TiDBEvolvePlanTaskStartTime, variable.TiDBEvolvePlanTaskEndTime,
-		variable.TiDBIsolationReadEngines, variable.TiDBMetricSchemaRangeDuration, variable.TiDBMetricSchemaStep, variable.TiDBPProfSQLCPU,
-		variable.TiDBReplicaRead, variable.TiDBStmtSummaryHistorySize, variable.TiDBStmtSummaryInternalQuery, variable.TiDBStmtSummaryMaxSQLLength,
-		variable.TiDBStmtSummaryMaxStmtCount, variable.TiDBStmtSummaryRefreshInterval, variable.TiDBUsePlanBaselines, variable.TiDBWindowConcurrency:
+	case vardef.TiDBFoundInPlanCache, vardef.TiDBFoundInBinding, vardef.TiDBCapturePlanBaseline, vardef.TiDBEnableChunkRPC,
+		vardef.TiDBEnableIndexMerge, vardef.TiDBEnableNoopFuncs, vardef.TiDBEnableVectorizedExpression, vardef.TiDBAllowBatchCop,
+		vardef.TiDBEvolvePlanBaselines, vardef.TiDBEvolvePlanTaskMaxTime, vardef.TiDBEvolvePlanTaskStartTime, vardef.TiDBEvolvePlanTaskEndTime,
+		vardef.TiDBIsolationReadEngines, vardef.TiDBMetricSchemaRangeDuration, vardef.TiDBMetricSchemaStep, vardef.TiDBPProfSQLCPU,
+		vardef.TiDBReplicaRead, vardef.TiDBStmtSummaryHistorySize, vardef.TiDBStmtSummaryInternalQuery, vardef.TiDBStmtSummaryMaxSQLLength,
+		vardef.TiDBStmtSummaryMaxStmtCount, vardef.TiDBStmtSummaryRefreshInterval, vardef.TiDBUsePlanBaselines, vardef.TiDBWindowConcurrency:
 		return ` <span class="version-mark">New in v4.0</span>`
-	case variable.SQLSelectLimit, variable.TiDBEnableTelemetry:
+	case vardef.SQLSelectLimit, vardef.TiDBEnableTelemetry:
 		return ` <span class="version-mark">New in v4.0.2</span>`
-	case variable.TiDBAllowFallbackToTiKV, variable.TiDBAllowMPPExecution, variable.TiDBBCJThresholdCount, variable.TiDBBCJThresholdSize,
-		variable.TiDBEnableAsyncCommit, variable.TiDBEnable1PC, variable.TiDBEnableClusteredIndex, variable.TiDBEnableParallelApply,
-		variable.TiDBEnableStrictDoubleTypeCheck, variable.TiDBEnableListTablePartition, variable.TiDBExecutorConcurrency,
-		variable.TiDBGCEnable, variable.TiDBGCRunInterval, variable.TiDBGCLifetime, variable.TiDBGCConcurrency, variable.TiDBGCScanLockMode,
-		variable.TiDBMemQuotaApplyCache, variable.TiDBOptPreferRangeScan, variable.TiDBSkipASCIICheck:
+	case vardef.TiDBAllowFallbackToTiKV, vardef.TiDBAllowMPPExecution, vardef.TiDBBCJThresholdCount, vardef.TiDBBCJThresholdSize,
+		vardef.TiDBEnableAsyncCommit, vardef.TiDBEnable1PC, vardef.TiDBEnableClusteredIndex, vardef.TiDBEnableParallelApply,
+		vardef.TiDBEnableStrictDoubleTypeCheck, vardef.TiDBEnableListTablePartition, vardef.TiDBExecutorConcurrency,
+		vardef.TiDBGCEnable, vardef.TiDBGCRunInterval, vardef.TiDBGCLifetime, vardef.TiDBGCConcurrency, vardef.TiDBGCScanLockMode,
+		vardef.TiDBMemQuotaApplyCache, vardef.TiDBOptPreferRangeScan, vardef.TiDBSkipASCIICheck:
 		return ` <span class="version-mark">New in v5.0</span>`
-	case variable.TiDBAllowRemoveAutoInc:
+	case vardef.TiDBAllowRemoveAutoInc:
 		return ` <span class="version-mark">New in v2.1.18 and v3.0.4</span>`
-	case variable.TiDBEnableAmendPessimisticTxn:
-		return ` <span class="version-mark">New in v4.0.7</span>`
-	case variable.TiDBEnableStmtSummary:
+	case vardef.TiDBEnableStmtSummary:
 		return ` <span class="version-mark">New in v3.0.4</span>`
-	case variable.TiDBMaxDeltaSchemaCount:
+	case vardef.TiDBMaxDeltaSchemaCount:
 		return ` <span class="version-mark">New in v2.1.18 and v3.0.5</span>`
-	case variable.TiDBMultiStatementMode:
+	case vardef.TiDBMultiStatementMode:
 		return ` <span class="version-mark">New in v4.0.11</span>`
-	case variable.TiDBStoreLimit:
+	case vardef.TiDBStoreLimit:
 		return ` <span class="version-mark">New in v3.0.4 and v4.0</span>`
-	case variable.TiDBPartitionPruneMode, variable.TiDBEnforceMPPExecution:
+	case vardef.TiDBPartitionPruneMode, vardef.TiDBEnforceMPPExecution:
 		return ` <span class="version-mark">New in v5.1</span>`
-	case variable.TiDBAnalyzeVersion:
+	case vardef.TiDBAnalyzeVersion:
 		return ` <span class="version-mark">New in v5.1.0</span>`
-	case variable.SkipNameResolve, variable.TiDBAllowFunctionForExpressionIndex, variable.TiDBRestrictedReadOnly:
+	case vardef.SkipNameResolve, vardef.TiDBAllowFunctionForExpressionIndex, vardef.TiDBRestrictedReadOnly:
 		return ` <span class="version-mark">New in v5.2.0</span>`
-	case variable.TiDBEnablePseudoForOutdatedStats, variable.TiDBEnableTSOFollowerProxy, variable.TiDBLogFileMaxDays,
-		variable.TiDBTmpTableMaxSize, variable.TiDBTSOClientBatchMaxWaitTime:
+	case vardef.TiDBEnablePseudoForOutdatedStats, vardef.TiDBEnableTSOFollowerProxy, vardef.TiDBLogFileMaxDays,
+		vardef.TiDBTmpTableMaxSize, vardef.TiDBTSOClientBatchMaxWaitTime:
 		return ` <span class="version-mark">New in v5.3.0</span>`
-	case variable.TiDBEnableColumnTracking, variable.TiDBPersistAnalyzeOptions, variable.TiDBEnablePaging, variable.TiDBReadStaleness,
-		variable.TiDBRegardNULLAsPoint, variable.TiDBStatsLoadPseudoTimeout, variable.TiDBStatsLoadSyncWait,
-		variable.TiDBEnableTopSQL:
+	case vardef.TiDBEnableColumnTracking, vardef.TiDBPersistAnalyzeOptions, vardef.TiDBEnablePaging, vardef.TiDBReadStaleness,
+		vardef.TiDBRegardNULLAsPoint, vardef.TiDBStatsLoadPseudoTimeout, vardef.TiDBStatsLoadSyncWait,
+		vardef.TiDBEnableTopSQL:
 		return ` <span class="version-mark">New in v5.4.0</span>`
-	case variable.TiDBEnableLegacyInstanceScope, variable.TiDBSysdateIsNow, variable.TiDBTableCacheLease,
-		variable.TiDBEnableMutationChecker, variable.TiDBIgnorePreparedCacheCloseStmt, variable.TiDBMemQuotaBindingCache,
-		variable.TiDBPlacementMode, variable.TiDBTxnAssertionLevel, variable.TiDBRCReadCheckTS,
-		variable.TiDBTopSQLMaxMetaCount, variable.TiDBTopSQLMaxTimeSeriesCount:
+	case vardef.TiDBEnableLegacyInstanceScope, vardef.TiDBSysdateIsNow, vardef.TiDBTableCacheLease,
+		vardef.TiDBEnableMutationChecker, vardef.TiDBIgnorePreparedCacheCloseStmt, vardef.TiDBMemQuotaBindingCache,
+		vardef.TiDBPlacementMode, vardef.TiDBTxnAssertionLevel, vardef.TiDBRCReadCheckTS,
+		vardef.TiDBTopSQLMaxMetaCount, vardef.TiDBTopSQLMaxTimeSeriesCount:
 		return ` <span class="version-mark">New in v6.0.0</span>`
-	case variable.RequireSecureTransport, variable.TiDBCommitterConcurrency, variable.TiDBEnableAutoAnalyze,
-	variable.TiDBEnableBatchDML, variable.TiDBEnablePrepPlanCache,
-	variable.TiDBMemOOMAction, variable.TiDBPrepPlanCacheSize, variable.TiDBPrepPlanCacheMemoryGuardRatio:
+	case vardef.RequireSecureTransport, vardef.TiDBCommitterConcurrency, vardef.TiDBEnableAutoAnalyze,
+	vardef.TiDBEnableBatchDML, vardef.TiDBEnablePrepPlanCache,
+	vardef.TiDBMemOOMAction, vardef.TiDBPrepPlanCacheSize, vardef.TiDBPrepPlanCacheMemoryGuardRatio:
 		return ` <span class="version-mark">New in v6.1.0</span>`
 	default:
 		return ""
@@ -274,11 +271,11 @@ func formatSpecialVersionComment(sv *variable.SysVar) string {
 func getExtendedDescription(sv *variable.SysVar) string {
 
 	switch sv.Name {
-	case variable.TiDBAllowAutoRandExplicitInsert:
+	case vardef.TiDBAllowAutoRandExplicitInsert:
 		return "- Determines whether to allow explicitly specifying the values of the column with the `AUTO_RANDOM` attribute in the `INSERT` statement."
-	case variable.AutoIncrementIncrement:
+	case vardef.AutoIncrementIncrement:
 		return "- Controls the step size of `AUTO_INCREMENT` values to be allocated to a column. It is often used in combination with `auto_increment_offset`."
-	case variable.AutoIncrementOffset:
+	case vardef.AutoIncrementOffset:
 		return "- Controls the initial offset of `AUTO_INCREMENT` values to be allocated to a column. This setting is often used in combination with `auto_increment_increment`. For example:\n" +
 			"\n" +
 			"```sql\n" +
@@ -306,43 +303,43 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"+----+\n" +
 			"4 rows in set (0.00 sec)\n" +
 			"```"
-	case variable.AutoCommit:
+	case vardef.AutoCommit:
 		return "- Controls whether statements should automatically commit when not in an explicit transaction. See [Transaction Overview](/transaction-overview.md#autocommit) for more information."
 	case "ddl_slow_threshold":
 		return "- Log DDL operations whose execution time exceeds the threshold value."
-	case variable.ForeignKeyChecks:
+	case vardef.ForeignKeyChecks:
 		return "- For compatibility, TiDB returns foreign key checks as `OFF`."
-	case variable.Hostname:
+	case vardef.Hostname:
 		return "- The hostname of the TiDB server as a read-only variable."
-	case variable.InnodbLockWaitTimeout:
+	case vardef.InnodbLockWaitTimeout:
 		return "- The lock wait timeout for pessimistic transactions (default)."
-	case variable.InteractiveTimeout:
+	case vardef.InteractiveTimeout:
 		return "- This variable represents the idle timeout of the interactive user session. Interactive user session refers to the session established by calling [`mysql_real_connect()`](https://dev.mysql.com/doc/c-api/5.7/en/mysql-real-connect.html) API using the `CLIENT_INTERACTIVE` option (for example, MySQL Shell and MySQL Client). This variable is fully compatible with MySQL."
-	case variable.TiDBFoundInBinding:
+	case vardef.TiDBFoundInBinding:
 		return "- This variable is used to show whether the execution plan used in the previous statement was influenced by a [plan binding](/sql-plan-management.md)"
-	case variable.TiDBFoundInPlanCache:
+	case vardef.TiDBFoundInPlanCache:
 		return "- This variable is used to show whether the execution plan used in the previous `execute` statement is taken directly from the plan cache."
-	case variable.MaxExecutionTime:
+	case vardef.MaxExecutionTime:
 		return "- The maximum execution time of a statement. The default value is unlimited (zero).\n" +
 			"\n" +
 			"> **Note:**\n" +
 			">\n" +
 			"> Unlike in MySQL, the `max_execution_time` system variable currently works on all kinds of statements in TiDB, not only restricted to the `SELECT` statement. The precision of the timeout value is roughly 100ms. This means the statement might not be terminated in accurate milliseconds as you specify."
-	case variable.Port:
+	case vardef.Port:
 		return "- The port that the `tidb-server` is listening on when speaking the MySQL protocol."
-	case variable.Socket:
+	case vardef.Socket:
 		return "- The local unix socket file that the `tidb-server` is listening on when speaking the MySQL protocol."
-	case variable.SQLModeVar:
+	case vardef.SQLModeVar:
 		return "- This variable controls a number of MySQL compatibility behaviors. See [SQL Mode](/sql-mode.md) for more information."
-	case variable.SQLSelectLimit:
+	case vardef.SQLSelectLimit:
 		return "- The maximum number of rows returned by the `SELECT` statements."
-	case variable.SystemTimeZone:
+	case vardef.SystemTimeZone:
 		return "- This variable shows the system time zone from when TiDB was first bootstrapped. See also [`time_zone`](#time_zone)."
-	case variable.WaitTimeout:
+	case vardef.WaitTimeout:
 		return "- This variable controls the idle timeout of user sessions. A zero-value means unlimited."
-	case variable.WindowingUseHighPrecision:
+	case vardef.WindowingUseHighPrecision:
 		return "- This variable controls whether to use the high precision mode when computing the window functions."
-	case variable.TiDBAllowBatchCop:
+	case vardef.TiDBAllowBatchCop:
 		return "- This variable is used to control how TiDB sends a coprocessor request to TiFlash. It has the following values:\n" +
 			"\n" +
 			"    * `0`: Never send requests in batches\n" +
@@ -355,41 +352,41 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"    - `0` or `OFF`, which means that the MPP mode will not be used.\n" +
 			"    - `1` or `ON`, which means that the optimizer determines whether to use the MPP mode based on the cost estimation (by default).\n\n" +
 			"MPP is a distributed computing framework provided by the TiFlash engine, which allows data exchange between nodes and provides high-performance, high-throughput SQL algorithms. For details about the selection of the MPP mode, refer to [Control whether to select the MPP mode](/tiflash/use-tiflash.md#control-whether-to-select-the-mpp-mode)."
-	case variable.TiDBAllowRemoveAutoInc:
+	case vardef.TiDBAllowRemoveAutoInc:
 		return "- This variable is used to set whether the `AUTO_INCREMENT` property of a column is allowed to be removed by executing `ALTER TABLE MODIFY` or `ALTER TABLE CHANGE` statements. It is not allowed by default."
-	case variable.TiDBAutoAnalyzeEndTime:
+	case vardef.TiDBAutoAnalyzeEndTime:
 		return "- This variable is used to restrict the time window that the automatic update of statistics is permitted. For example, to only allow automatic statistics updates between 1AM and 3AM, set `tidb_auto_analyze_start_time='01:00 +0000'` and `tidb_auto_analyze_end_time='03:00 +0000'`."
-	case variable.TiDBAutoAnalyzeRatio:
+	case vardef.TiDBAutoAnalyzeRatio:
 		return "- This variable is used to set the threshold when TiDB automatically executes [`ANALYZE TABLE`](/sql-statements/sql-statement-analyze-table.md) in a background thread to update table statistics. For example, a value of 0.5 means that auto-analyze is triggered when greater than 50% of the rows in a table have been modified. Auto-analyze can be restricted to only execute during certain hours of the day by specifying `tidb_auto_analyze_start_time` and `tidb_auto_analyze_end_time`.\n" +
 			"\n" +
 			"> **Note:**\n" +
 			">\n" +
 			"> This feature requires the system variable `tidb_enable_auto_analyze` set to `ON`."
-	case variable.TiDBAutoAnalyzeStartTime:
+	case vardef.TiDBAutoAnalyzeStartTime:
 		return "- This variable is used to restrict the time window that the automatic update of statistics is permitted. For example, to only allow automatic statistics updates between 1AM and 3AM, set `tidb_auto_analyze_start_time='01:00 +0000'` and `tidb_auto_analyze_end_time='03:00 +0000'`."
-	case variable.TiDBBackoffLockFast:
+	case vardef.TiDBBackoffLockFast:
 		return "- This variable is used to set the `backoff` time when the read request meets a lock."
-	case variable.TiDBBackOffWeight:
+	case vardef.TiDBBackOffWeight:
 		return "- This variable is used to increase the weight of the maximum time of TiDB `backoff`, that is, the maximum retry time for sending a retry request when an internal network or other component (TiKV, PD) failure is encountered. This variable can be used to adjust the maximum retry time and the minimum value is 1.\n" +
 			"\n" +
 			"    For example, the base timeout for TiDB to take TSO from PD is 15 seconds. When `tidb_backoff_weight = 2`, the maximum timeout for taking TSO is: *base time \\* 2 = 30 seconds*.\n" +
 			"\n" +
 			"    In the case of a poor network environment, appropriately increasing the value of this variable can effectively alleviate error reporting to the application end caused by timeout. If the application end wants to receive the error information more quickly, minimize the value of this variable."
-	case variable.TiDBBCJThresholdCount:
+	case vardef.TiDBBCJThresholdCount:
 		return "- If the objects of the join operation belong to a subquery, the optimizer cannot estimate the size of the subquery result set. In this situation, the size is determined by the number of rows in the result set. If the estimated number of rows in the subquery is less than the value of this variable, the Broadcast Hash Join algorithm is used. Otherwise, the Shuffled Hash Join algorithm is used."
-	case variable.TiDBBCJThresholdSize:
+	case vardef.TiDBBCJThresholdSize:
 		return "- If the table size is less than the value of the variable, the Broadcast Hash Join algorithm is used. Otherwise, the Shuffled Hash Join algorithm is used."
-	case variable.TiDBBuildStatsConcurrency:
+	case vardef.TiDBBuildStatsConcurrency:
 		return "- This variable is used to set the concurrency of executing the `ANALYZE` statement.\n- When the variable is set to a larger value, the execution performance of other queries is affected."
-	case variable.TiDBCapturePlanBaseline:
+	case vardef.TiDBCapturePlanBaseline:
 		return "- This variable is used to control whether to enable the [baseline capturing](/sql-plan-management.md#baseline-capturing) feature. This feature depends on the statement summary, so you need to enable the statement summary before you use baseline capturing.\n- After this feature is enabled, the historical SQL statements in the statement summary are traversed periodically, and bindings are automatically created for SQL statements that appear at least twice."
-	case variable.TiDBCheckMb4ValueInUTF8:
+	case vardef.TiDBCheckMb4ValueInUTF8:
 		return "- This variable is used to enforce that the `utf8` character set only stores values from the [Basic Multilingual Plane (BMP)](https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane). To store characters outside the BMP, it is recommended to use the `utf8mb4` character set.\n- You might need to disable this option when upgrading your cluster from an earlier version of TiDB where the `utf8` checking was more relaxed. For details, see [FAQs After Upgrade](/faq/upgrade-faq.md)."
-	case variable.TiDBChecksumTableConcurrency:
+	case vardef.TiDBChecksumTableConcurrency:
 		return "- This variable is used to set the scan index concurrency of executing the `ADMIN CHECKSUM TABLE` statement.\n- When the variable is set to a larger value, the execution performance of other queries is affected."
-	case variable.TiDBConfig:
+	case vardef.TiDBConfig:
 		return "- This variable is read-only. It is used to obtain the configuration information of the current TiDB server."
-	case variable.TiDBConstraintCheckInPlace:
+	case vardef.TiDBConstraintCheckInPlace:
 		return "- This setting only applies to optimistic transactions. When this variable is set to `OFF`, checking for duplicate values in UNIQUE indexes is deferred until the transaction commits. This helps improve performance, but might be an unexpected behavior for some applications. See [Constraints](/constraints.md) for details.\n" +
 			"\n" +
 			"    - When set to zero and using optimistic transactions:\n" +
@@ -414,19 +411,19 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"        ```\n" +
 			"\n" +
 			"Constraint checking is always performed in place for pessimistic transactions (default)."
-	case variable.TiDBCurrentTS:
+	case vardef.TiDBCurrentTS:
 		return "- This variable is read-only. It is used to obtain the timestamp of the current transaction."
-	case variable.TiDBDDLErrorCountLimit:
+	case vardef.TiDBDDLErrorCountLimit:
 		return "- This variable is used to set the number of retries when the DDL operation fails. When the number of retries exceeds the parameter value, the wrong DDL operation is canceled."
-	case variable.TiDBDDLReorgBatchSize:
+	case vardef.TiDBDDLReorgBatchSize:
 		return "- This variable is used to set the batch size during the `re-organize` phase of the DDL operation. For example, when TiDB executes the `ADD INDEX` operation, the index data needs to backfilled by `tidb_ddl_reorg_worker_cnt` (the number) concurrent workers. Each worker backfills the index data in batches.\n" +
 			"    - If many updating operations such as `UPDATE` and `REPLACE` exist during the `ADD INDEX` operation, a larger batch size indicates a larger probability of transaction conflicts. In this case, you need to adjust the batch size to a smaller value. The minimum value is 32.\n" +
 			"    - If the transaction conflict does not exist, you can set the batch size to a large value. This can increase the speed of the backfilling data, but the write pressure on TiKV also becomes higher."
-	case variable.TiDBDDLReorgPriority:
+	case vardef.TiDBDDLReorgPriority:
 		return "- This variable is used to set the priority of executing the `ADD INDEX` operation in the `re-organize` phase.\n- You can set the value of this variable to `PRIORITY_LOW`, `PRIORITY_NORMAL` or `PRIORITY_HIGH`."
-	case variable.TiDBDDLReorgWorkerCount:
+	case vardef.TiDBDDLReorgWorkerCount:
 		return "- This variable is used to set the concurrency of the DDL operation in the `re-organize` phase."
-	case variable.TiDBDisableTxnAutoRetry:
+	case vardef.TiDBDisableTxnAutoRetry:
 		return "- This variable is used to set whether to disable the automatic retry of explicit optimistic transactions. The default value of `ON` means that transactions will not automatically retry in TiDB and `COMMIT` statements might return errors that need to be handled in the application layer.\n" +
 			"\n" +
 			"    Setting the value to `OFF` means that TiDB will automatically retry transactions, resulting in fewer errors from `COMMIT` statements. Be careful when making this change, because it might result in lost updates.\n" +
@@ -436,26 +433,16 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"    For more details, see [limits of retry](/optimistic-transaction.md#limits-of-retry).\n" +
 			"\n" +
 			"    This variable only applies to optimistic transactions, not to pessimistic transactions. The number of retries for pessimistic transactions is controlled by [`max_retry_count`](/tidb-configuration-file.md#max-retry-count)."
-	case variable.TiDBDistSQLScanConcurrency:
+	case vardef.TiDBDistSQLScanConcurrency:
 		return "- This variable is used to set the concurrency of the `scan` operation.\n" +
 			"- Use a bigger value in OLAP scenarios, and a smaller value in OLTP scenarios.\n" +
 			"- For OLAP scenarios, the maximum value should not exceed the number of CPU cores of all the TiKV nodes.\n" +
 			"- If a table has a lot of partitions, you can reduce the variable value appropriately to avoid TiKV becoming out of memory (OOM)."
-	case variable.TiDBDMLBatchSize:
+	case vardef.TiDBDMLBatchSize:
 		return "- When this value is greater than `0`, TiDB will batch commit statements such as `INSERT` or `LOAD DATA` into smaller transactions. This reduces memory usage and helps ensure that the `txn-total-size-limit` is not reached by bulk modifications.\n" +
 			"- To use `tidb_dml_batch_size` in `INSERT` statements, you also need to set the system variable `tidb_batch_insert` to `ON`.\n" +
 			"- Only the value `0` provides ACID compliance. Setting this to any other value will break the atomicity and isolation guarantees of TiDB."
-	case variable.TiDBEnableAmendPessimisticTxn:
-		return "- This variable is used to control whether to enable the `AMEND TRANSACTION` feature. If you enable the `AMEND TRANSACTION` feature in a pessimistic transaction, when concurrent DDL operations and SCHEMA VERSION changes exist on tables associated with this transaction, TiDB attempts to amend the transaction. TiDB corrects the transaction commit to make the commit consistent with the latest valid SCHEMA VERSION so that the transaction can be successfully committed without getting the `Information schema is changed` error. This feature is effective on the following concurrent DDL operations:\n" +
-			"\n" +
-			"    - `ADD COLUMN` or `DROP COLUMN` operations.\n" +
-			"    - `MODIFY COLUMN` or `CHANGE COLUMN` operations which increase the length of a field.\n" +
-			"    - `ADD INDEX` or `DROP INDEX` operations in which the index column is created before the transaction is opened.\n" +
-			"\n" +
-			"> **Note:**\n" +
-			">\n" +
-			"> Currently, this feature is incompatible with TiDB Binlog in some scenarios and might cause semantic changes on a transaction. For more usage precautions of this feature, refer to [Incompatibility issues about transaction semantic](https://github.com/pingcap/tidb/issues/21069) and [Incompatibility issues about TiDB Binlog](https://github.com/pingcap/tidb/issues/20996)."
-	case variable.TiDBEnableAsyncCommit:
+	case vardef.TiDBEnableAsyncCommit:
 		return "- This variable controls whether to enable the async commit feature for the second phase of the two-phase transaction commit to perform asynchronously in the background. Enabling this feature can reduce the latency of transaction commit.\n" +
 			"\n" +
 			"> **Note:**\n" +
@@ -463,7 +450,7 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"> - The default value of `ON` only applies to new clusters. if your cluster was upgraded from an earlier version of TiDB, the value `OFF` will be used instead.\n" +
 			"> - If you have enabled TiDB Binlog, enabling this variable cannot improve the performance. To improve the performance, it is recommended to use [TiCDC](/ticdc/ticdc-overview.md) instead.\n" +
 			"> - Enabling this parameter only means that Async Commit becomes an optional mode of transaction commit. In fact, the most suitable mode of transaction commit is determined by TiDB."
-	case variable.TiDBEnable1PC:
+	case vardef.TiDBEnable1PC:
 		return "- This variable is used to specify whether to enable the one-phase commit feature for transactions that only affect one Region. Compared with the often-used two-phase commit, one-phase commit can greatly reduce the latency of transaction commit and increase the throughput.\n" +
 			"\n" +
 			"> **Note:**\n" +
@@ -471,25 +458,25 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"> - The default value of `ON` only applies to new clusters. if your cluster was upgraded from an earlier version of TiDB, the value `OFF` will be used instead.\n" +
 			"> - If you have enabled TiDB Binlog, enabling this variable cannot improve the performance. To improve the performance, it is recommended to use [TiCDC](/ticdc/ticdc-overview.md) instead.\n" +
 			"> - Enabling this parameter only means that one-phase commit becomes an optional mode of transaction commit. In fact, the most suitable mode of transaction commit is determined by TiDB."
-	case variable.TiDBEnableCascadesPlanner:
+	case vardef.TiDBEnableCascadesPlanner:
 		return "- This variable is used to control whether to enable the cascades planner."
-	case variable.TiDBEnableChunkRPC:
+	case vardef.TiDBEnableChunkRPC:
 		return "- This variable is used to control whether to enable the `Chunk` data encoding format in Coprocessor."
-	case variable.TiDBEnableClusteredIndex:
+	case vardef.TiDBEnableClusteredIndex:
 		return "- This variable is used to control whether to create the primary key as a [clustered index](/clustered-indexes.md) by default." +
 			` "By default" here means that the statement does not explicitly specify the keyword` +
 			" `CLUSTERED`/`NONCLUSTERED`. Supported values are `OFF`, `ON`, and `INT_ONLY`:\n" +
 			"    - `OFF` indicates that primary keys are created as non-clustered indexes by default.\n" +
 			"    - `ON` indicates that primary keys are created as clustered indexes by default.\n" +
 			"    - `INT_ONLY` indicates that the behavior is controlled by the configuration item `alter-primary-key`. If `alter-primary-key` is set to `true`, all primary keys are created as non-clustered indexes by default. If it is set to `false`, only the primary keys which consist of an integer column are created as clustered indexes."
-	case variable.TiDBEnableCollectExecutionInfo:
+	case vardef.TiDBEnableCollectExecutionInfo:
 		return "- This variable controls whether to record the execution information of each operator in the slow query log."
-	case variable.TiDBEnableFastAnalyze:
+	case vardef.TiDBEnableFastAnalyze:
 		return "- This variable is used to set whether to enable the statistics `Fast Analyze` feature.\n" +
 			"- If the statistics `Fast Analyze` feature is enabled, TiDB randomly samples about 10,000 rows of data as statistics. When the data is distributed unevenly or the data size is small, the statistics accuracy is low. This might lead to a non-optimal execution plan, for example, selecting a wrong index. If the execution time of the regular `Analyze` statement is acceptable, it is recommended to disable the `Fast Analyze` feature."
-	case variable.TiDBEnableIndexMerge:
+	case vardef.TiDBEnableIndexMerge:
 		return "- This variable is used to control whether to enable the index merge feature."
-	case variable.TiDBEnableNoopFuncs:
+	case vardef.TiDBEnableNoopFuncs:
 		return "- By default, TiDB returns an error when you attempt to use the syntax for functionality that is not yet implemented. When the variable value is set to `ON`, TiDB silently ignores such cases of unavailable functionality, which is helpful if you cannot make changes to the SQL code.\n" +
 			"- Enabling `noop` functions controls the following behaviors:\n" +
 			"    * `get_lock` and `release_lock` functions\n" +
@@ -502,16 +489,16 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"> **Warning:**\n" +
 			">\n" +
 			"> Only the default value of `OFF` can be considered safe. Setting `tidb_enable_noop_functions=1` might lead to unexpected behaviors in your application, because it permits TiDB to ignore certain syntax without providing an error. For example, the syntax `START TRANSACTION READ ONLY` is permitted, but the transaction remains in read-write mode."
-	case variable.TiDBEnableParallelApply:
+	case vardef.TiDBEnableParallelApply:
 		return "- This variable controls whether to enable concurrency for the `Apply` operator. The number of concurrencies is controlled by the `tidb_executor_concurrency` variable. The `Apply` operator processes correlated subqueries and has no concurrency by default, so the execution speed is slow. Setting this variable value to `1` can increase concurrency and speed up execution. Currently, concurrency for `Apply` is disabled by default."
-	case variable.TiDBEnableRateLimitAction:
+	case vardef.TiDBEnableRateLimitAction:
 		return "- This variable controls whether to enable the dynamic memory control feature for the operator that reads data. By default, this operator enables the maximum number of threads that [`tidb_distsql_scan_concurrency`](/system-variables.md#tidb_distsql_scan_concurrency) allows to read data. When the memory usage of a single SQL statement exceeds [`tidb_mem_quota_query`](/system-variables.md#tidb_mem_quota_query) each time, the operator that reads data stops one thread.\n" +
 			"- When the operator that reads data has only one thread left and the memory usage of a single SQL statement continues to exceed [`tidb_mem_quota_query`](/system-variables.md#tidb_mem_quota_query), this SQL statement triggers other memory control behaviors, such as [spilling data to disk](/tidb-configuration-file.md#oom-use-tmp-storage)."
-	case variable.TiDBEnableSlowLog:
+	case vardef.TiDBEnableSlowLog:
 		return "- This variable is used to control whether to enable the slow log feature."
-	case variable.TiDBEnableStmtSummary:
+	case vardef.TiDBEnableStmtSummary:
 		return "- This variable is used to control whether to enable the statement summary feature. If enabled, SQL execution information like time consumption is recorded to the `information_schema.STATEMENTS_SUMMARY` system table to identify and troubleshoot SQL performance issues."
-	case variable.TiDBEnableStrictDoubleTypeCheck:
+	case vardef.TiDBEnableStrictDoubleTypeCheck:
 		return "- This variable is used to control if tables can be created with invalid definitions of type `DOUBLE`. This setting is intended to provide an upgrade path from earlier versions of TiDB, which were less strict in validating types.\n" +
 			"- The default value of `ON` is compatible with MySQL.\n" +
 			"\n" +
@@ -532,41 +519,41 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			">\n" +
 			"> This setting only applies to the type `DOUBLE` since MySQL permits precision for `FLOAT` types. This behavior is deprecated starting with MySQL 8.0.17, and it is not recommended to specify precision for either `FLOAT` or `DOUBLE` types."
 
-	case variable.TiDBEnableTablePartition:
+	case vardef.TiDBEnableTablePartition:
 		return "- This variable is used to set whether to enable the `TABLE PARTITION` feature:\n" +
 			"    - `ON` indicates enabling Range partitioning, Hash partitioning, and Range column partitioning with one single column.\n" +
 			"    - `AUTO` functions the same way as `ON` does.\n" +
 			"    - `OFF` indicates disabling the `TABLE PARTITION` feature. In this case, the syntax that creates a partition table can be executed, but the table created is not a partitioned one."
-	case variable.TiDBEnableListTablePartition:
+	case vardef.TiDBEnableListTablePartition:
 		return "- This variable is used to set whether to enable the `LIST (COLUMNS) TABLE PARTITION` feature."
-	case variable.TiDBEnableTelemetry:
+	case vardef.TiDBEnableTelemetry:
 		return "- This variable is used to dynamically control whether the telemetry collection in TiDB is enabled. By setting the value to `OFF`, the telemetry collection is disabled. If the [`enable-telemetry`](/tidb-configuration-file.md#enable-telemetry-new-in-v402) TiDB configuration item is set to `false` on all TiDB instances, the telemetry collection is always disabled and this system variable will not take effect. See [Telemetry](/telemetry.md) for details."
-	case variable.Version:
+	case vardef.Version:
 		return "- This variable returns the MySQL version, followed by the TiDB version. For example '5.7.25-TiDB-v4.0.0-beta.2-716-g25e003253'."
-	case variable.VersionComment:
+	case vardef.VersionComment:
 		return "- This variable returns additional details about the TiDB version. For example, 'TiDB Server (Apache License 2.0) Community Edition, MySQL 5.7 compatible'."
-	case variable.TransactionIsolation:
+	case vardef.TransactionIsolation:
 		return "- This variable sets the transaction isolation. TiDB advertises `REPEATABLE-READ` for compatibility with MySQL, but the actual isolation level is Snapshot Isolation. See [transaction isolation levels](/transaction-isolation-levels.md) for further details."
-	case variable.TimeZone:
+	case vardef.TimeZone:
 		return "- This variable returns the current time zone. Values can be specified as either an offset such as '-8:00' or a named zone 'America/Los_Angeles'.\n- The value `SYSTEM` means that the time zone should be the same as the system host, which is available via the [`system_time_zone`](#system_time_zone) variable."
-	case variable.TiDBWindowConcurrency:
+	case vardef.TiDBWindowConcurrency:
 		return "- This variable is used to set the concurrency degree of the window operator.\n- A value of `-1` means that the value of `tidb_executor_concurrency` will be used instead."
-	case variable.TiDBEnableWindowFunction:
+	case vardef.TiDBEnableWindowFunction:
 		return "- This variable is used to control whether to enable the support for window functions. Note that window functions may use reserved keywords. This might cause SQL statements that could be executed normally cannot be parsed after upgrading TiDB. In this case, you can set `tidb_enable_window_function` to `OFF`."
-	case variable.TiDBEnableVectorizedExpression:
+	case vardef.TiDBEnableVectorizedExpression:
 		return "- This variable is used to control whether to enable vectorized execution."
-	case variable.TiDBEvolvePlanBaselines:
+	case vardef.TiDBEvolvePlanBaselines:
 		return "- This variable is used to control whether to enable the baseline evolution feature. For detailed introduction or usage , see [Baseline Evolution](/sql-plan-management.md#baseline-evolution).\n" +
 			"- To reduce the impact of baseline evolution on the cluster, use the following configurations:\n" +
 			"    - Set `tidb_evolve_plan_task_max_time` to limit the maximum execution time of each execution plan. The default value is 600s.\n" +
 			"    - Set `tidb_evolve_plan_task_start_time` and `tidb_evolve_plan_task_end_time` to limit the time window. The default values are respectively `00:00 +0000` and `23:59 +0000`."
-	case variable.TiDBEvolvePlanTaskEndTime:
+	case vardef.TiDBEvolvePlanTaskEndTime:
 		return "- This variable is used to set the end time of baseline evolution in a day."
-	case variable.TiDBEvolvePlanTaskMaxTime:
+	case vardef.TiDBEvolvePlanTaskMaxTime:
 		return "- This variable is used to limit the maximum execution time of each execution plan in the baseline evolution feature."
-	case variable.TiDBEvolvePlanTaskStartTime:
+	case vardef.TiDBEvolvePlanTaskStartTime:
 		return "- This variable is used to set the start time of baseline evolution in a day."
-	case variable.TiDBExecutorConcurrency:
+	case vardef.TiDBExecutorConcurrency:
 		return "\nThis variable is used to set the concurrency of the following SQL operators (to one value):\n" +
 			"\n" +
 			"- `index lookup`\n" +
@@ -589,17 +576,17 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"Since v5.0, you can still separately modify the system variables listed above (with a deprecation warning returned) and your modification only affects the corresponding single operators. After that, if you use `tidb_executor_concurrency` to modify the operator concurrency, the separately modified operators will not be affected. If you want to use `tidb_executor_concurrency` to modify the concurrency of all operators, you can set the values of all variables listed above to `-1`.\n" +
 			"\n" +
 			"For a system upgraded to v5.0 from an earlier version, if you have not modified any value of the variables listed above (which means that the `tidb_hash_join_concurrency` value is `5` and the values of the rest are `4`), the operator concurrency previously managed by these variables will automatically be managed by `tidb_executor_concurrency`. If you have modified any of these variables, the concurrency of the corresponding operators will still be controlled by the modified variables."
-	case variable.TiDBExpensiveQueryTimeThreshold:
+	case vardef.TiDBExpensiveQueryTimeThreshold:
 		return "- This variable is used to set the threshold value that determines whether to print expensive query logs. The difference between expensive query logs and slow query logs is:\n" +
 			"    - Slow logs are printed after the statement is executed.\n" +
 			"    - Expensive query logs print the statements that are being executed, with execution time exceeding the threshold value, and their related information."
-	case variable.TiDBForcePriority:
+	case vardef.TiDBForcePriority:
 		return "- This variable is used to change the default priority for statements executed on a TiDB server. A use case is to ensure that a particular user that is performing OLAP queries receives lower priority than users performing OLTP queries.\n- You can set the value of this variable to `NO_PRIORITY`, `LOW_PRIORITY`, `DELAYED` or `HIGH_PRIORITY`."
-	case variable.TiDBGCConcurrency:
+	case vardef.TiDBGCConcurrency:
 		return "- Specifies the number of threads in the [Resolve Locks](/garbage-collection-overview.md#resolve-locks) step of GC. A value of `-1` means that TiDB will automatically decide the number of garbage collection threads to use."
-	case variable.TiDBGCEnable:
+	case vardef.TiDBGCEnable:
 		return "- Enables garbage collection for TiKV. Disabling garbage collection will reduce system performance, as old versions of rows will no longer be purged."
-	case variable.TiDBGCLifetime:
+	case vardef.TiDBGCLifetime:
 		return "- The time limit during which data is retained for each GC, in the format of Go Duration. When a GC happens, the current time minus this value is the safe point.\n" +
 			"\n" +
 			"> **Note:**\n" +
@@ -608,12 +595,12 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			">     - Larger storage use\n" +
 			">     - A large amount of history data may affect performance to a certain degree, especially for range queries such as `select count(*) from t`\n" +
 			"> - If there is any transaction that has been running longer than `tidb_gc_life_time`, during GC, the data since `start_ts` is retained for this transaction to continue execution. For example, if `tidb_gc_life_time` is configured to 10 minutes, among all transactions being executed, the transaction that starts earliest has been running for 15 minutes, GC will retain data of the recent 15 minutes."
-	case variable.TiDBGCRunInterval:
+	case vardef.TiDBGCRunInterval:
 		return "- Specifies the GC interval, in the format of Go Duration, for example, `\"1h30m\"`, and `\"15m\"`"
-	case variable.TiDBGCScanLockMode:
+	case vardef.TiDBGCScanLockMode:
 		return "    - `LEGACY`: Uses the old way of scanning, that is, disable Green GC.\n    - `PHYSICAL`: Uses the physical scanning method, that is, enable Green GC.\n" +
 			"- This variable specifies the way of scanning locks in the Resolve Locks step of GC. When the variable value is set to `LEGACY`, TiDB scans locks by Regions. When the value `PHYSICAL` is used, it enables each TiKV node to bypass the Raft layer and directly scan data, which can effectively mitigate the impact of GC wakening up all Regions when the [Hibernate Region](/tikv-configuration-file.md#hibernate-regions) feature is enabled, thus improving the execution speed in the Resolve Locks step."
-	case variable.TiDBGeneralLog:
+	case vardef.TiDBGeneralLog:
 		return "- This variable is used to set whether to record all SQL statements in the [log](/tidb-configuration-file.md#logfile). This feature is disabled by default. If maintenance personnel needs to trace all SQL statements when locating issues, they can enable this feature.\n" +
 			"- To see all records of this feature in the log, query the `\"GENERAL_LOG\"` string. The following information is recorded:\n" +
 			"    - `conn`: The ID of the current session.\n" +
@@ -625,23 +612,23 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"    - `current_db`: The name of the current database.\n" +
 			"    - `txn_mode`: The transactional mode. Value options are `OPTIMISTIC` and `PESSIMISTIC`.\n" +
 			"    - `sql`: The SQL statement corresponding to the current query."
-	case variable.TiDBHashJoinConcurrency:
+	case vardef.TiDBHashJoinConcurrency:
 		return "- This variable is used to set the concurrency of the `hash join` algorithm.\n- A value of `-1` means that the value of `tidb_executor_concurrency` will be used instead."
-	case variable.TiDBHashAggFinalConcurrency:
+	case vardef.TiDBHashAggFinalConcurrency:
 		return "- This variable is used to set the concurrency of executing the concurrent `hash aggregation` algorithm in the `final` phase.\n- When the parameter of the aggregate function is not distinct, `HashAgg` is run concurrently and respectively in two phases - the `partial` phase and the `final` phase.\n- A value of `-1` means that the value of `tidb_executor_concurrency` will be used instead."
-	case variable.TiDBHashAggPartialConcurrency:
+	case vardef.TiDBHashAggPartialConcurrency:
 		return "- This variable is used to set the concurrency of executing the concurrent `hash aggregation` algorithm in the `partial` phase.\n- When the parameter of the aggregate function is not distinct, `HashAgg` is run concurrently and respectively in two phases - the `partial` phase and the `final` phase.\n- A value of `-1` means that the value of `tidb_executor_concurrency` will be used instead."
-	case variable.TiDBIndexLookupConcurrency:
+	case vardef.TiDBIndexLookupConcurrency:
 		return "- This variable is used to set the concurrency of the `index lookup` operation.\n- Use a bigger value in OLAP scenarios, and a smaller value in OLTP scenarios.\n- A value of `-1` means that the value of `tidb_executor_concurrency` will be used instead."
-	case variable.TiDBIndexLookupJoinConcurrency:
+	case vardef.TiDBIndexLookupJoinConcurrency:
 		return "- This variable is used to set the concurrency of the `index lookup join` algorithm.\n- A value of `-1` means that the value of `tidb_executor_concurrency` will be used instead."
-	case variable.TiDBIndexLookupSize:
+	case vardef.TiDBIndexLookupSize:
 		return "- This variable is used to set the batch size of the `index lookup` operation.\n- Use a bigger value in OLAP scenarios, and a smaller value in OLTP scenarios."
-	case variable.TiDBIndexSerialScanConcurrency:
+	case vardef.TiDBIndexSerialScanConcurrency:
 		return "- This variable is used to set the concurrency of the `serial scan` operation.\n- Use a bigger value in OLAP scenarios, and a smaller value in OLTP scenarios."
-	case variable.TiDBInitChunkSize:
+	case vardef.TiDBInitChunkSize:
 		return "- This variable is used to set the number of rows for the initial chunk during the execution process."
-	case variable.TiDBMultiStatementMode:
+	case vardef.TiDBMultiStatementMode:
 		return "- This variable controls whether to allow multiple queries to be executed in the same `COM_QUERY` call.\n" +
 			"- To reduce the impact of SQL injection attacks, TiDB now prevents multiple queries from being executed in the same `COM_QUERY` call by default. This variable is intended to be used as part of an upgrade path from earlier versions of TiDB. The following behaviors apply:\n" +
 			"\n" +
@@ -661,27 +648,27 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"> * [go-sql-driver](https://github.com/go-sql-driver/mysql#multistatements) (`multiStatements`)\n" +
 			"> * [Connector/J](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-configuration-properties.html) (`allowMultiQueries`)\n" +
 			"> * PHP [mysqli](https://dev.mysql.com/doc/apis-php/en/apis-php-mysqli.quickstart.multiple-statement.html) (`mysqli_multi_query`)"
-	case variable.TiDBIsolationReadEngines:
+	case vardef.TiDBIsolationReadEngines:
 		return "- This variable is used to set the storage engine list that TiDB can use when reading data."
-	case variable.TiDBTxnMode:
+	case vardef.TiDBTxnMode:
 		return "- This variable is used to set the transaction mode. TiDB 3.0 supports the pessimistic transactions. Since TiDB 3.0.8, the [pessimistic transaction mode](/pessimistic-transaction.md) is enabled by default.\n" +
 			"- If you upgrade TiDB from v3.0.7 or earlier versions to v3.0.8 or later versions, the default transaction mode does not change. **Only the newly created clusters use the pessimistic transaction mode by default**.\n" +
 			"- If this variable is set to \"optimistic\" or \"\", TiDB uses the [optimistic transaction mode](/optimistic-transaction.md)."
-	case variable.TiDBLowResolutionTSO:
+	case vardef.TiDBLowResolutionTSO:
 		return "- This variable is used to set whether to enable the low precision TSO feature. After this feature is enabled, new transactions use a timestamp updated every 2 seconds to read data.\n- The main applicable scenario is to reduce the overhead of acquiring TSO for small read-only transactions when reading old data is acceptable."
-	case variable.TiDBMaxChunkSize:
+	case vardef.TiDBMaxChunkSize:
 		return "- This variable is used to set the maximum number of rows in a chunk during the execution process. Setting to too large of a value may cause cache locality issues."
-	case variable.TiDBMaxDeltaSchemaCount:
+	case vardef.TiDBMaxDeltaSchemaCount:
 		return "- This variable is used to set the maximum number of schema versions (the table IDs modified for corresponding versions) allowed to be cached. The value range is 100 ~ 16384."
-	case variable.TiDBMemQuotaQuery:
+	case vardef.TiDBMemQuotaQuery:
 		return "- This variable is used to set the threshold value of memory quota for a query.\n- If the memory quota of a query during execution exceeds the threshold value, TiDB performs the operation designated by the OOMAction option in the configuration file. The initial value of this variable is configured by [`mem-quota-query`](/tidb-configuration-file.md#mem-quota-query)."
-	case variable.TiDBMemQuotaApplyCache:
+	case vardef.TiDBMemQuotaApplyCache:
 		return "- This variable is used to set the memory usage threshold of the local cache in the `Apply` operator.\n- The local cache in the `Apply` operator is used to speed up the computation of the `Apply` operator. You can set the variable to `0` to disable the `Apply` cache feature."
-	case variable.TiDBMemoryUsageAlarmRatio:
+	case vardef.TiDBMemoryUsageAlarmRatio:
 		return "- TiDB triggers an alarm when the percentage of the memory it takes exceeds a certain threshold. For the detailed usage description of this feature, see [`memory-usage-alarm-ratio`](/tidb-configuration-file.md#memory-usage-alarm-ratio-new-in-v409).\n- You can set the initial value of this variable by configuring [`memory-usage-alarm-ratio`](/tidb-configuration-file.md#memory-usage-alarm-ratio-new-in-v409)."
-	case variable.TiDBOptAggPushDown:
+	case vardef.TiDBOptAggPushDown:
 		return "- This variable is used to set whether the optimizer executes the optimization operation of pushing down the aggregate function to the position before Join, Projection, and UnionAll.\n- When the aggregate operation is slow in query, you can set the variable value to ON."
-	case variable.TiDBOptDistinctAggPushDown:
+	case vardef.TiDBOptDistinctAggPushDown:
 		return "- This variable is used to set whether the optimizer executes the optimization operation of pushing down the aggregate function with `distinct` (such as `select count(distinct a) from t`) to Coprocessor.\n" +
 			"- When the aggregate function with the `distinct` operation is slow in the query, you can set the variable value to `1`.\n" +
 			"\n" +
@@ -712,7 +699,7 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"+---------------------------+----------+-----------+---------------+------------------------------------------+\n" +
 			"4 rows in set (0.00 sec)\n" +
 			"```"
-	case variable.TiDBOptInSubqToJoinAndAgg:
+	case vardef.TiDBOptInSubqToJoinAndAgg:
 		return "- This variable is used to set whether to enable the optimization rule that converts a subquery to join and aggregation.\n" +
 			"- For example, after you enable this optimization rule, the subquery is converted as follows:\n" +
 			"\n" +
@@ -731,7 +718,7 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"    ```sql\n" +
 			"    select t.* from t, t1 where t.a=t1.aa;\n" +
 			"    ```"
-	case variable.TiDBOptPreferRangeScan:
+	case vardef.TiDBOptPreferRangeScan:
 		return "- After you set the value of this variable to `ON`, the optimizer always prefers range scans over full table scans.\n" +
 			"- In the following example, before you enable `tidb_opt_prefer_range_scan`, the TiDB optimizer performs a full table scan. After you enable `tidb_opt_prefer_range_scan`, the optimizer selects an index range scan.\n" +
 			"\n" +
@@ -758,10 +745,10 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"+-------------------------------+------------+-----------+-----------------------------+-------------------------------+\n" +
 			"3 rows in set (0.00 sec)\n" +
 			"```"
-	case variable.TiDBSkipUTF8Check:
+	case vardef.TiDBSkipUTF8Check:
 		return "- This variable is used to set whether to skip UTF-8 validation.\n" +
 			"- Validating UTF-8 characters affects the performance. When you are sure that the input characters are valid UTF-8 characters, you can set the variable value to `ON`."
-	case variable.TiDBSlowLogThreshold:
+	case vardef.TiDBSlowLogThreshold:
 		return "- This variable is used to output the threshold value of the time consumed by the slow log. When the time consumed by a query is larger than this value, this query is considered as a slow log and its log is output to the slow query log.\n" +
 			"\n" +
 			"Usage example:\n" +
@@ -769,9 +756,9 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"```sql\n" +
 			"SET tidb_slow_log_threshold = 200;\n" +
 			"```"
-	case variable.TiDBSlowQueryFile:
+	case vardef.TiDBSlowQueryFile:
 		return "- When `INFORMATION_SCHEMA.SLOW_QUERY` is queried, only the slow query log name set by `slow-query-file` in the configuration file is parsed. The default slow query log name is \"tidb-slow.log\". To parse other logs, set the `tidb_slow_query_file` session variable to a specific file path, and then query `INFORMATION_SCHEMA.SLOW_QUERY` to parse the slow query log based on the set file path. For details, see [Identify Slow Queries](/identify-slow-queries.md)."
-	case variable.TiDBQueryLogMaxLen:
+	case vardef.TiDBQueryLogMaxLen:
 		return "- The maximum length of the SQL statement output. When the output length of a statement is larger than the `tidb_query-log-max-len` value, the statement is truncated to output.\n" +
 			"\n" +
 			"Usage example:\n" +
@@ -780,55 +767,55 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"SET tidb_query_log_max_len = 20\n" +
 			"```\n" +
 			"- This setting was previously also available a tidb.toml option (`log.query-log-max-len`), but is only a system variable starting from TiDB 6.1."
-	case variable.TiDBRecordPlanInSlowLog:
+	case vardef.TiDBRecordPlanInSlowLog:
 		return "- This variable is used to control whether to include the execution plan of slow queries in the slow log."
-	case variable.TiDBReplicaRead:
+	case vardef.TiDBReplicaRead:
 		return "- This variable is used to control where TiDB reads data. Here are three options:\n" +
 			"    - leader: Read only from leader node\n" +
 			"    - follower: Read only from follower node\n" +
 			"    - leader-and-follower: Read from leader or follower node\n" +
 			"- See [follower reads](/follower-read.md) for additional details."
-	case variable.TiDBEnableEnhancedSecurity:
+	case vardef.TiDBEnableEnhancedSecurity:
 		return "- This variable indicates whether the TiDB server you are connected to has the Security Enhanced Mode (SEM) enabled. To change its value, you need to modify the value of `enable-sem` in your TiDB server configuration file and restart the TiDB server.\n" +
 			"- SEM is inspired by the design of systems such as [Security-Enhanced Linux](https://en.wikipedia.org/wiki/Security-Enhanced_Linux). It reduces the abilities of users with the MySQL `SUPER` privilege and instead requires `RESTRICTED` fine-grained privileges to be granted as a replacement. These fine-grained privileges include:\n" +
 			"    - `RESTRICTED_TABLES_ADMIN`: The ability to write data to system tables in the `mysql` schema and to see sensitive columns on `information_schema` tables.\n" +
 			"    - `RESTRICTED_STATUS_ADMIN`: The ability to see sensitive variables in the command `SHOW STATUS`.\n" +
 			"    - `RESTRICTED_VARIABLES_ADMIN`: The ability to see and set sensitive variables in `SHOW [GLOBAL] VARIABLES` and `SET`.\n" +
 			"    - `RESTRICTED_USER_ADMIN`: The ability to prevent other users from making changes or dropping a user account."
-	case variable.TiDBIndexJoinBatchSize:
+	case vardef.TiDBIndexJoinBatchSize:
 		return "- This variable is used to set the batch size of the `index lookup join` operation.\n- Use a bigger value in OLAP scenarios, and a smaller value in OLTP scenarios."
-	case variable.TiDBMetricSchemaRangeDuration:
+	case vardef.TiDBMetricSchemaRangeDuration:
 		return "- This variable is used to set the range duration of the Prometheus statement generated when querying `METRICS_SCHEMA`."
-	case variable.TiDBMetricSchemaStep:
+	case vardef.TiDBMetricSchemaStep:
 		return "- This variable is used to set the step of the Prometheus statement generated when querying `METRICS_SCHEMA`."
-	case variable.TiDBOptCorrelationExpFactor:
+	case vardef.TiDBOptCorrelationExpFactor:
 		return "- When the method that estimates the number of rows based on column order correlation is not available, the heuristic estimation method is used. This variable is used to control the behavior of the heuristic method.\n" +
 			"    - When the value is 0, the heuristic method is not used.\n" +
 			"    - When the value is greater than 0:\n" +
 			"        - A larger value indicates that an index scan will probably be used in the heuristic method.\n" +
 			"        - A smaller value indicates that a table scan will probably be used in the heuristic method."
-	case variable.TiDBOptCorrelationThreshold:
+	case vardef.TiDBOptCorrelationThreshold:
 		return "- This variable is used to set the threshold value that determines whether to enable estimating the row count by using column order correlation. If the order correlation between the current column and the `handle` column exceeds the threshold value, this method is enabled."
-	case variable.TiDBOptWriteRowID:
+	case vardef.TiDBOptWriteRowID:
 		return "- This variable is used to control whether to allow `INSERT`, `REPLACE`, and `UPDATE` statements to operate on the `_tidb_rowid` column. This variable can be used only when you import data using TiDB tools."
-	case variable.TiDBPProfSQLCPU:
+	case vardef.TiDBPProfSQLCPU:
 		return "- This variable is used to control whether to mark the corresponding SQL statement in the profile output to identify and troubleshoot performance issues."
-	case variable.TiDBProjectionConcurrency:
+	case vardef.TiDBProjectionConcurrency:
 		return "- This variable is used to set the concurrency of the `Projection` operator.\n- A value of `-1` means that the value of `tidb_executor_concurrency` will be used instead."
-	case variable.TiDBRedactLog:
+	case vardef.TiDBRedactLog:
 		return "- This variable controls whether to hide user information in the SQL statement being recorded into the TiDB log and slow log.\n- When you set the variable to `1`, user information is hidden. For example, if the executed SQL statement is `insert into t values (1,2)`, the statement is recorded as `insert into t values (?,?)` in the log."
-	case variable.TiDBRetryLimit:
+	case vardef.TiDBRetryLimit:
 		return "- This variable is used to set the maximum number of the retries for optimistic transactions. When a transaction encounters retryable errors (such as transaction conflicts, very slow transaction commit, or table schema changes), this transaction is re-executed according to this variable. Note that setting `tidb_retry_limit` to `0` disables the automatic retry. This variable only applies to optimistic transactions, not to pessimistic transactions."
-	case variable.TiDBRowFormatVersion:
+	case vardef.TiDBRowFormatVersion:
 		return "- Controls the format version of the newly saved data in the table. In TiDB v4.0, the [new storage row format](https://github.com/pingcap/tidb/blob/master/docs/design/2018-07-19-row-format.md) version `2` is used by default to save new data.\n" +
 			"- If you upgrade from a TiDB version earlier than 4.0.0 to 4.0.0, the format version is not changed, and TiDB continues to use the old format of version `1` to write data to the table, which means that **only newly created clusters use the new data format by default**.\n" +
 			"- Note that modifying this variable does not affect the old data that has been saved, but applies the corresponding version format only to the newly written data after modifying this variable."
-	case variable.TiDBScatterRegion:
+	case vardef.TiDBScatterRegion:
 		return "- By default, Regions are split for a new table when it is being created in TiDB. After this variable is enabled, the newly split Regions are scattered immediately during the execution of the `CREATE TABLE` statement. This applies to the scenario where data need to be written in batches right after the tables are created in batches, because the newly split Regions can be scattered in TiKV beforehand and do not have to wait to be scheduled by PD. To ensure the continuous stability of writing data in batches, the `CREATE TABLE` statement returns success only after the Regions are successfully scattered. This makes the statement's execution time multiple times longer than that when you disable this variable.\n" +
 			"- Note that if `SHARD_ROW_ID_BITS` and `PRE_SPLIT_REGIONS` have been set when a table is created, the specified number of Regions are evenly split after the table creation."
-	case variable.TiDBSkipASCIICheck:
+	case vardef.TiDBSkipASCIICheck:
 		return "- This variable is used to set whether to skip ASCII validation.\n- Validating ASCII characters affects the performance. When you are sure that the input characters are valid ASCII characters, you can set the variable value to `ON`."
-	case variable.TiDBSkipIsolationLevelCheck:
+	case vardef.TiDBSkipIsolationLevelCheck:
 		return "- After this switch is enabled, if an isolation level unsupported by TiDB is assigned to `tx_isolation`, no error is reported. This helps improve compatibility with applications that set (but do not depend on) a different isolation level.\n\n" +
 			"```sql\n" +
 			"tidb> set tx_isolation='serializable';\n" +
@@ -839,100 +826,100 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"tidb> set tx_isolation='serializable';\n" +
 			"Query OK, 0 rows affected, 1 warning (0.00 sec)\n" +
 			"```"
-	case variable.TiDBSnapshot:
+	case vardef.TiDBSnapshot:
 		return "- This variable is used to set the time point at which the data is read by the session. For example, when you set the variable to \"2017-11-11 20:20:20\" or a TSO number like \"400036290571534337\", the current session reads the data of this moment."
-	case variable.TiDBStmtSummaryHistorySize:
+	case vardef.TiDBStmtSummaryHistorySize:
 		return "- This variable is used to set the history capacity of [statement summary tables](/statement-summary-tables.md)."
-	case variable.TiDBStmtSummaryInternalQuery:
+	case vardef.TiDBStmtSummaryInternalQuery:
 		return "- This variable is used to control whether to include the SQL information of TiDB in [statement summary tables](/statement-summary-tables.md)."
-	case variable.TiDBStmtSummaryMaxStmtCount:
+	case vardef.TiDBStmtSummaryMaxStmtCount:
 		return "- This variable is used to set the maximum number of statements that [statement summary tables](/statement-summary-tables.md) store in memory."
-	case variable.TiDBStmtSummaryRefreshInterval:
+	case vardef.TiDBStmtSummaryRefreshInterval:
 		return "- This variable is used to set the refresh time of [statement summary tables](/statement-summary-tables.md)."
-	case variable.TiDBStoreLimit:
+	case vardef.TiDBStoreLimit:
 		return "- This variable is used to limit the maximum number of requests TiDB can send to TiKV at the same time. 0 means no limit."
-	case variable.TiDBStmtSummaryMaxSQLLength:
+	case vardef.TiDBStmtSummaryMaxSQLLength:
 		return "- This variable is used to control the length of the SQL string in [statement summary tables](/statement-summary-tables.md)."
-	case variable.TiDBUsePlanBaselines:
+	case vardef.TiDBUsePlanBaselines:
 		return "- This variable is used to control whether to enable the execution plan binding feature. It is enabled by default, and can be disabled by assigning the `OFF` value. For the use of the execution plan binding, see [Execution Plan Binding](/sql-plan-management.md#create-a-binding)."
-	case variable.TiDBWaitSplitRegionFinish:
+	case vardef.TiDBWaitSplitRegionFinish:
 		return "- It usually takes a long time to scatter Regions, which is determined by PD scheduling and TiKV loads. This variable is used to set whether to return the result to the client after all Regions are scattered completely when the `SPLIT REGION` statement is being executed:\n" +
 			"    - `ON` requires that the `SPLIT REGIONS` statement waits until all Regions are scattered.\n" +
 			"    - `OFF` permits the `SPLIT REGIONS` statement to return before finishing scattering all Regions.\n" +
 			"- Note that when scattering Regions, the write and read performances for the Region that is being scattered might be affected. In batch-write or data importing scenarios, it is recommended to import data after Regions scattering is finished."
-	case variable.TiDBWaitSplitRegionTimeout:
+	case vardef.TiDBWaitSplitRegionTimeout:
 		return "- This variable is used to set the timeout for executing the `SPLIT REGION` statement. If a statement is not executed completely within the specified time value, a timeout error is returned."
-	case variable.WarningCount:
+	case vardef.WarningCount:
 		return "- This read-only variable indicates the number of warnings that occurred in the statement that was previously executed."
-	case variable.CTEMaxRecursionDepth:
+	case vardef.CTEMaxRecursionDepth:
 		return "- Controls the maximum recursion depth in Common Table Expressions."
-	case variable.InitConnect:
+	case vardef.InitConnect:
 		return "- The `init_connect` feature permits a SQL statement to be automatically executed when you first connect to a TiDB server. If you have the `CONNECTION_ADMIN` or `SUPER` privileges, this `init_connect` statement will not be executed. If the `init_connect` statement results in an error, your user connection will be terminated."
-	case variable.TiDBPartitionPruneMode:
+	case vardef.TiDBPartitionPruneMode:
 		return "- Specifies whether to enable `dynamic` mode for partitioned tables. For details about the dynamic pruning mode, see [Dynamic Pruning Mode for Partitioned Tables](/partitioned-table.md#dynamic-pruning-mode)."
-	case variable.TiDBEnforceMPPExecution:
+	case vardef.TiDBEnforceMPPExecution:
 		return "- To change this default value, modify the [`performance.enforce-mpp`](/tidb-configuration-file.md#enforce-mpp) configuration value.\n" +
 			"- Controls whether to ignore the optimizer's cost estimation and to forcibly use TiFlash's MPP mode for query execution. The value options are as follows:\n" +
 			"    - `0` or `OFF`, which means that the MPP mode is not forcibly used (by default).\n" +
 			"    - `1` or `ON`, which means that the cost estimation is ignored and the MPP mode is forcibly used. Note that this setting only takes effect when `tidb_allow_mpp=true`.\n\n" +
 			"MPP is a distributed computing framework provided by the TiFlash engine, which allows data exchange between nodes and provides high-performance, high-throughput SQL algorithms. For details about the selection of the MPP mode, refer to [Control whether to select the MPP mode](/tiflash/use-tiflash.md#control-whether-to-select-the-mpp-mode)."
-	case variable.CharacterSetClient:
+	case vardef.CharacterSetClient:
 		return "- The character set for data sent from the client. See [Character Set and Collation](/character-set-and-collation.md) for details on the use of character sets and collations in TiDB. It is recommended to use [`SET NAMES`](/sql-statements/sql-statement-set-names.md) to change the character set when needed."
-	case variable.CharacterSetConnection:
+	case vardef.CharacterSetConnection:
 		return "- The character set for string literals that do not have a specified character set."
-	case variable.CharsetDatabase:
+	case vardef.CharsetDatabase:
 		return "- This variable indicates the character set of the default database in use. **It is NOT recommended to set this variable**. When a new default database is selected, the server changes the variable value."
-	case variable.CharacterSetResults:
+	case vardef.CharacterSetResults:
 		return "- The character set that is used when data is sent to the client."
-	case variable.CharacterSetServer:
+	case vardef.CharacterSetServer:
 		return "- The default character set for the server."
-	case variable.DataDir:
+	case vardef.DataDir:
 		return "- This variable indicates the location where data is stored. This location can be a local path or point to a PD server if the data is stored on TiKV.\n" +
 			"- A value in the format of `ip_address:port` indicates the PD server that TiDB connects to on startup."
-	case variable.DefaultAuthPlugin:
+	case vardef.DefaultAuthPlugin:
 		return "- This variable sets the authentication method that the server advertises when the server-client connection is being established. Possible values for this variable are documented in [Authentication plugin status](/security-compatibility-with-mysql.md#authentication-plugin-status).\n" +
 			"- Value options: `mysql_native_password` and `caching_sha2_password`. For more details, see [Authentication plugin status](/security-compatibility-with-mysql.md#authentication-plugin-status)."
 	case "license":
 		return "- This variable indicates the license of your TiDB server installation."
-	case variable.TiDBAnalyzeVersion:
+	case vardef.TiDBAnalyzeVersion:
 		return "- Controls how TiDB collects statistics.\n" +
 			"- In v5.3.0 and later versions, the default value of this variable is `2`, which serves as an experimental feature. If your cluster is upgraded from a version earlier than v5.3.0 to v5.3.0 or later, the default value of `tidb_analyze_version` does not change. For detailed introduction, see [Introduction to Statistics](/statistics.md)."
-	case variable.TiDBOptLimitPushDownThreshold:
+	case vardef.TiDBOptLimitPushDownThreshold:
 		return "- This variable is used to set the threshold that determines whether to push the Limit or TopN operator down to TiKV.\n" +
 			"- If the value of the Limit or TopN operator is smaller than or equal to this threshold, these operators are forcibly pushed down to TiKV. This variable resolves the issue that the Limit or TopN operator cannot be pushed down to TiKV partly due to wrong estimation."
-	case variable.TiDBOptEnableCorrelationAdjustment:
+	case vardef.TiDBOptEnableCorrelationAdjustment:
 		return "- This variable is used to control whether the optimizer estimates the number of rows based on column order correlation"
-	case variable.TiDBEnableAutoIncrementInGenerated:
+	case vardef.TiDBEnableAutoIncrementInGenerated:
 		return "- This variable is used to determine whether to include the `AUTO_INCREMENT` columns when creating a generated column or an expression index."
-	case variable.Timestamp:
+	case vardef.Timestamp:
 		return "- A non-empty value of this variable indicates the UNIX epoch that is used as the timestamp for `CURRENT_TIMESTAMP()`, `NOW()`, and other functions. This variable might be used in data restore or replication."
 	case "ssl_key":
 		return "- The location of the private key file (if there is one) that is used for SSL/TLS connections."
 	case "ssl_cert":
 		return "- The location of the certificate file (if there is a file) that is used for SSL/TLS connections."
-	case variable.MaxAllowedPacket:
+	case vardef.MaxAllowedPacket:
 		return "- The maximum size of a packet for the MySQL protocol."
-	case variable.BlockEncryptionMode:
+	case vardef.BlockEncryptionMode:
 		return "- Defines the encryption mode for the `AES_ENCRYPT()` and `AES_DECRYPT()` functions."
-	case variable.CollationConnection:
+	case vardef.CollationConnection:
 		return "- This variable indicates the collation for string literals that do not have a specified collation."
-	case variable.CollationDatabase:
+	case vardef.CollationDatabase:
 		return "- This variable indicates the collation of the default database in use. **It is NOT recommended to set this variable**. When a new default database is selected, the server changes the variable value."
-	case variable.CollationServer:
+	case vardef.CollationServer:
 		return "- The default collation for the server."
-	case variable.DefaultWeekFormat:
+	case vardef.DefaultWeekFormat:
 		return "- Sets the week format used by the `WEEK()` function."
-	case variable.GroupConcatMaxLen:
+	case vardef.GroupConcatMaxLen:
 		return "- The maximum buffer size for items in the `GROUP_CONCAT()` function."
 	case "have_openssl":
 		return "- A read-only variable for MySQL compatibility. Set to `YES` by the server when the server has TLS enabled."
 	case "have_ssl":
 		return "- A read-only variable for MySQL compatibility. Set to `YES` by the server when the server has TLS enabled."
-	case variable.PluginDir:
+	case vardef.PluginDir:
 		return "- Indicates the directory to load plugins as specified by a command-line flag."
-	case variable.PluginLoad:
+	case vardef.PluginLoad:
 		return "- Indicates the plugins to load when TiDB is started. These plugins are specified by a command-line flag and separated by commas."
-	case variable.SkipNameResolve:
+	case vardef.SkipNameResolve:
 		return "- This variable controls whether the `tidb-server` instance resolves hostnames as a part of the connection handshake.\n" +
 			"- When the DNS is unreliable, you can enable this option to improve network performance.\n" +
 			"\n" +
@@ -945,26 +932,18 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"> ```\n" +
 			">\n" +
 			"> In this example, it is recommended to replace `apphost` with an IP address or the wildcard (`%`)."
-	case variable.LogBin:
-		return "- This variable indicates whether [TiDB Binlog](/tidb-binlog/tidb-binlog-overview.md) is used."
-	case variable.LastInsertID:
+	case vardef.LastInsertID:
 		return "- This variable returns the last `AUTO_INCREMENT` or `AUTO_RANDOM` value generated by an insert statement.\n" +
 			"- The value of `last_insert_id` is the same as the value returned by the function `LAST_INSERT_ID()`."
-	case variable.SQLLogBin:
-		return "- Indicates whether to write changes to [TiDB Binlog](/tidb-binlog/tidb-binlog-overview.md) or not.\n" +
-			"\n" +
-			"> **Note:**\n" +
-			">\n" +
-			"> It is not recommended to set `sql_log_bin` as a global variable because the future versions of TiDB might only allow setting this as a session variable."
 	case "ssl_ca":
 		return "- The location of the certificate authority file (if there is one)."
 	case "version_compile_machine":
 		return "- This variable returns the name of the CPU architecture on which TiDB is running."
 	case "version_compile_os":
 		return "- This variable returns the name of the OS on which TiDB is running."
-	case variable.TiDBAllowFunctionForExpressionIndex:
+	case vardef.TiDBAllowFunctionForExpressionIndex:
 		return "- This variable is used to show the functions that are allowed to be used for creating expression indexes."
-	case variable.TiDBEnableTSOFollowerProxy:
+	case vardef.TiDBEnableTSOFollowerProxy:
 		return "- This variable is used to enable the TSO Follower Proxy feature. When the value is `OFF`, TiDB only gets TSO from the PD leader. After this feature is enabled, TiDB gets TSO by evenly sending requests to all PD nodes and forwarding TSO requests through PD followers. This helps reduce the CPU pressure of PD leader.\n" +
 			"- Scenarios for enabling TSO Follower Proxy:\n" +
 			"    * Due to the high pressure of TSO requests, the CPU of the PD leader reaches a bottleneck, which causes high latency of TSO RPC requests.\n" +
@@ -973,9 +952,9 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"> **Note:**\n" +
 			">\n" +
 			"> Suppose that the TSO RPC latency increases for reasons other than a CPU usage bottleneck of the PD leader (such as network issues). In this case, enabling the TSO Follower Proxy might increase the execution latency in TiDB and affect the QPS performance of the cluster."
-	case variable.TiDBLogFileMaxDays:
+	case vardef.TiDBLogFileMaxDays:
 		return "- This variable is used to adjust the maximum days of logger on the current TiDB instance. Its value defaults to the value of the [`max-days`](/tidb-configuration-file.md#max-days) configuration in the configuration file. Changing the variable value only affects the current TiDB instance. After TiDB is restarted, the variable value is reset and the configuration value is not affected."
-	case variable.TiDBTSOClientBatchMaxWaitTime:
+	case vardef.TiDBTSOClientBatchMaxWaitTime:
 		return "- Range: `[0, 10]`\n" +
 			"- Unit: Milliseconds\n" +
 			"- This variable is used to set the maximum waiting time for a batch operation when TiDB requests TSO from PD. The default value is `0`, which means no extra waiting time.\n" +
@@ -989,69 +968,69 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"> **Notes:**\n" +
 			">\n" +
 			"> Suppose that the TSO RPC latency increases for reasons other than a CPU usage bottleneck of the PD leader (such as network issues). In this case, increasing the value of `tidb_tso_client_batch_max_wait_time` might increase the execution latency in TiDB and affect the QPS performance of the cluster."
-	case variable.TiDBEnablePseudoForOutdatedStats:
+	case vardef.TiDBEnablePseudoForOutdatedStats:
 		return "- This variable controls the behavior of the optimizer on using statistics of a table when the statistics are outdated.\n" +
 			"- The optimizer determines whether the statistics of a table is outdated in this way: since the last time `ANALYZE` is executed on a table to get the statistics, if 80% of the table rows are modified (the modified row count divided by the total row count), the optimizer determines that the statistics of this table is outdated. You can change this ratio using the [`pseudo-estimate-ratio`](/tidb-configuration-file.md#pseudo-estimate-ratio) configuration.\n" +
 			"- By default (with the variable value `ON`), when the statistics of a table is outdated, the optimizer determines that the statistics of the table is no longer reliable except for the total row count. Then, the optimizer uses the pseudo statistics. If you set the variable value to `OFF`, even if the statistics of a table are outdated, the optimizer still keeps using the statistics.\n" +
 			"- If the data on a table is frequently modified without executing `ANALYZE` on this table in time, to keep the execution plan stable, you can set the variable value to `OFF`."
-	case variable.TiDBTmpTableMaxSize:
+	case vardef.TiDBTmpTableMaxSize:
 		return "- This variable is used to set the maximum size of a single [temporary table](/temporary-tables.md). Any temporary table with a size larger than this variable value causes error."
-	case variable.RandSeed1, variable.RandSeed2:
+	case vardef.RandSeed1, vardef.RandSeed2:
 		return "- This variable is used to seed the random value generator used in the `RAND()` SQL function.\n" +
 			"- The behavior of this variable is MySQL compatible."
-	case variable.TiDBEnableColumnTracking:
+	case vardef.TiDBEnableColumnTracking:
 		return "- This variable controls whether to enable TiDB to collect `PREDICATE COLUMNS`. After enabling the collection, if you disable it, the information of previously collected `PREDICATE COLUMNS` is cleared. For details, see [Collect statistics on some columns](/statistics.md#collect-statistics-on-some-columns)."
-	case variable.TiDBEnableTopSQL:
+	case vardef.TiDBEnableTopSQL:
 		return "- This variable is used to control whether to enable the [Top SQL](/dashboard/top-sql.md) feature."
-	case variable.TiDBPersistAnalyzeOptions:
+	case vardef.TiDBPersistAnalyzeOptions:
 		return "- This variable controls whether to enable the [ANALYZE configuration persistence](/statistics.md#persist-analyze-configurations) feature."
-	case variable.TiDBReadStaleness:
+	case vardef.TiDBReadStaleness:
 		return "- This variable is used to set the time range of historical data that TiDB can read in the current session. After setting the value, TiDB selects a timestamp as new as possible from the range allowed by this variable, and all subsequent read operations are performed against this timestamp. For example, if the value of this variable is set to `-5`, on the condition that TiKV has the corresponding historical version's data, TiDB selects a timestamp as new as possible within a 5-second time range."
-	case variable.TiDBRegardNULLAsPoint:
+	case vardef.TiDBRegardNULLAsPoint:
 		return "- This variable controls whether the optimizer can use a query condition including null equivalence as a prefix condition for index access.\n" +
 			"- This variable is enabled by default. When it is enabled, the optimizer can reduce the volume of index data to be accessed, which accelerates query execution. For example, if a query involves multiple-column indexes `index(a, b)` and the query condition contains `a<=>null and b=1`, the optimizer can use both `a<=>null` and `b=1` in the query condition for index access. If the variable is disabled, because `a<=>null and b=1` includes the null equivalence condition, the optimizer does not use `b=1` for index access."
-	case variable.TiDBStatsLoadPseudoTimeout:
+	case vardef.TiDBStatsLoadPseudoTimeout:
 		return "- This variable controls how TiDB behaves when the waiting time of SQL optimization reaches the timeout to synchronously load complete column statistics. The default value `OFF` means that SQL execution fails after the timeout. If you set this variable to `ON`, the SQL optimization gets back to using pseudo statistics after the timeout."
-	case variable.TiDBStatsLoadSyncWait:
+	case vardef.TiDBStatsLoadSyncWait:
 		return "- This variable controls whether to enable the synchronously loading statistics feature. The default value `0` means that the feature is disabled. To enable the feature, you can set this variable to a timeout (in milliseconds) that SQL optimization can wait for at most to synchronously load complete column statistics. For details, see [Load statistics](/statistics.md#load-statistics)."
-	case variable.TiDBEnablePaging:
+	case vardef.TiDBEnablePaging:
 		return "- This variable controls whether to use the method of paging to send coprocessor requests in `IndexLookUp` operator.\n" +
 			"- User scenarios: For read queries that use `IndexLookup` and `Limit` and that `Limit` cannot be pushed down to `IndexScan`, there might be high latency for the read queries and high CPU usage for TiKV's `unified read pool`. In such cases, because the `Limit` operator only requires a small set of data, if you set `tidb_enable_paging` to `ON`, TiDB processes less data, which reduces query latency and resource consumption.\n" +
 			"- When `tidb_enable_paging` is enabled, for the `IndexLookUp` requests with `Limit` that cannot be pushed down and are fewer than `960`, TiDB uses the method of paging to send coprocessor requests. The fewer `Limit`, the more obvious the optimization."
-	case variable.TiDBEnableLegacyInstanceScope:
+	case vardef.TiDBEnableLegacyInstanceScope:
 		return "- This variable permits `INSTANCE` scoped variables to be set using the `SET SESSION` as well as `SET GLOBAL` syntax.\n" +
 			"- This option is enabled by default for compatibility with earlier versions of TiDB."
-	case variable.TiDBEnableMutationChecker:
+	case vardef.TiDBEnableMutationChecker:
 		return "- This variable is used to control whether to enable TiDB mutation checker, which is a tool used to check consistency between data and indexes during the execution of DML statements. If the checker returns an error for a statement, TiDB rolls back the execution of the statement. Enabling this variable causes a slight increase in CPU usage. For more information, see [Troubleshoot Inconsistency Between Data and Indexes](/troubleshoot-data-inconsistency-errors.md )."
-	case variable.TiDBIgnorePreparedCacheCloseStmt:
+	case vardef.TiDBIgnorePreparedCacheCloseStmt:
 		return "- This variable is used to set whether to ignore the commands for closing prepared statement cache.\n" +
 			"- When this variable is set to `ON`, the `COM_STMT_CLOSE` command of the Binary protocol and the [`DEALLOCATE PREPARE`](/sql-statements/sql-statement-deallocate.md) statement of the text protocol are ignored. For details, see [Ignore the `COM_STMT_CLOSE` command and the `DEALLOCATE PREPARE` statement](/sql-prepared-plan-cache.md#ignore-the-com_stmt_close-command-and-the-deallocate-prepare-statement)."
-	case variable.TiDBMemQuotaBindingCache:
+	case vardef.TiDBMemQuotaBindingCache:
 		return "- This variable is used to set the threshold of the memory used for caching bindings.\n" +
 			"- If a system creates or captures excessive bindings, resulting in overuse of memory space, TiDB returns a warning in the log. In this case, the cache cannot hold all available bindings or determine which bindings to store. For this reason, some queries might miss their bindings. To address this problem, you can increase the value of this variable, which increases the memory used for caching bindings. After modifying this parameter, you need to run `admin reload bindings` to reload bindings and validate the modification."
-	case variable.TiDBPlacementMode:
+	case vardef.TiDBPlacementMode:
 		return "- This variable controls whether DDL statements ignore the [placement rules specified in SQL](/placement-rules-in-sql.md). When the variable value is `IGNORE`, all placement rule options are ignored.\n" +
 			"- It is intended to be used by logical dump/restore tools to ensure that tables can always be created even if invalid placement rules are assigned. This is similar to how mysqldump writes `SET FOREIGN_KEY_CHECKS=0;` to the start of every dump file."
-	case variable.TiDBRCReadCheckTS:
+	case vardef.TiDBRCReadCheckTS:
 		return "- This variable is used to optimize the timestamp acquisition, which is suitable for scenarios with read-committed isolation level where read-write conflicts are rare. Enabling this variable can avoid the latency and cost of getting the global timestamp, and can optimize the transaction-level read latency.\n" +
 			"- If read-write conflicts are severe, enabling this feature will increase the cost and latency of getting the global timestamp, and might cause performance regression. For details, see [Read Committed isolation level](/transaction-isolation-levels.md#read-committed-isolation-level)."
-	case variable.TiDBSysdateIsNow:
+	case vardef.TiDBSysdateIsNow:
 		return "- This variable is used to control whether the `SYSDATE` function can be replaced by the `NOW` function. This configuration item has the same effect as the MySQL option [`sysdate-is-now`](https://dev.mysql.com/doc/refman/8.0/en/server-options.html#option_mysqld_sysdate-is-now)."
-	case variable.TiDBTableCacheLease:
+	case vardef.TiDBTableCacheLease:
 		return "- This variable is used to control the lease time of [cached tables](/cached-tables.md) with a default value of `3`. The value of this variable affects the modification to cached tables. After a modification is made to cached tables, the longest waiting time might be `tidb_table_cache_lease` seconds. If the table is read-only or can accept a high write latency, you can increase the value of this variable to increase the valid time for caching tables and to reduce the frequency of lease renewal."
-	case variable.TiDBTopSQLMaxMetaCount:
+	case vardef.TiDBTopSQLMaxMetaCount:
 		return "- This variable is used to control the maximum number of SQL statement types collected by [Top SQL](/dashboard/top-sql.md) per minute."
-	case variable.TiDBTopSQLMaxTimeSeriesCount:
+	case vardef.TiDBTopSQLMaxTimeSeriesCount:
 		return "- This variable is used to control how many SQL statements that contribute the most to the load (that is, top N) can be recorded by [Top SQL](/dashboard/top-sql.md) per minute."
-	case variable.TiDBTxnAssertionLevel:
+	case vardef.TiDBTxnAssertionLevel:
 		return "- This variable is used to control the assertion level. Assertion is a consistency check between data and indexes, which checks whether a key being written exists in the transaction commit process. For more information, see [Troubleshoot Inconsistency Between Data and Indexes](/troubleshoot-data-inconsistency-errors.md ).\n\n" +
 			"    - `OFF`: Disable this check.\n" +
 			"    - `FAST`: Enable most of the check items, with almost no impact on performance.\n" +
 			"    - `STRICT`: Enable all check items, with a minor impact on pessimistic transaction performance when the system workload is high."
-	case variable.TiDBBatchInsert:
+	case vardef.TiDBBatchInsert:
 		return "- This variable permits `tidb_dml_batch_size` to be used in `INSERT` statements.\n" +
 			"- Only the value `OFF` provides ACID compliance. Setting this to any other value breaks the atomicity and isolation guarantees of TiDB, because an individual `INSERT` statement will be split into smaller transactions."
-	case variable.TiDBRestrictedReadOnly:
+	case vardef.TiDBRestrictedReadOnly:
 		return "- This variable controls the read-only status of the entire cluster. When the variable is `ON`, all TiDB servers in the entire cluster are in the read-only mode. In this case, TiDB only executes the statements that do not modify data, such as `SELECT`, `USE`, and `SHOW`. For other statements such as `INSERT` and `UPDATE`, TiDB rejects executing those statements in the read-only mode.\n" +
 			"- Enabling the read-only mode using this variable only ensures that the entire cluster finally enters the read-only status. If you have changed the value of this variable in a TiDB cluster but the change has not yet propagated to other TiDB servers, the un-updated TiDB servers are still **not** in the read-only mode.\n" +
 			"- When this variable is enabled, the SQL statements being executed are not affected. TiDB only performs the read-only check for the SQL statements **to be** executed.\n" +
@@ -1061,31 +1040,31 @@ func getExtendedDescription(sv *variable.SysVar) string {
 			"    - For uncommitted read-only transactions with modified data, the commit of these transactions is rejected.\n" +
 			"- After the read-only mode is enabled, all users (including the users with the `SUPER` privilege) cannot execute the SQL statements that might write data unless the user is explicitly granted the `RESTRICTED_REPLICA_WRITER_ADMIN` privilege.\n" +
 			"- Users with `RESTRICTED_VARIABLES_ADMIN` or `SUPER` privileges can modify this variable. However, if the [security enhanced mode](#tidb_enable_enhanced_security) is enabled, only the users with the `RESTRICTED_VARIABLES_ADMIN` privilege can modify this variable."
-	case variable.RequireSecureTransport:
+	case vardef.RequireSecureTransport:
 		return "- This variable ensures that all connections to TiDB are either on a local socket, or using TLS. See [Enable TLS between TiDB Clients and Servers](/enable-tls-between-clients-and-servers.md) for additional details.\n" +
 			"- Setting this variable to `ON` requires you to connect to TiDB from a session that has TLS enabled. This helps prevent lock-out scenarios when TLS is not configured correctly.\n" +
 "- This setting was previously a tidb.toml option (`security.require-secure-transport`), but changed to a system variable starting from TiDB 6.1."
-	case variable.TiDBCommitterConcurrency:
+	case vardef.TiDBCommitterConcurrency:
 		return "- The number of goroutines for requests related to executing commit in the commit phase of the single transaction.\n" +
 		"- If the transaction to commit is too large, the waiting time for the flow control queue when the transaction is committed might be too long. In this situation, you can increase the configuration value to speed up the commit.\n" +
 		"- This setting was previously a tidb.toml option (`performance.committer-concurrency`), but changed to a system variable starting from TiDB 6.1."
-	case variable.TiDBEnableAutoAnalyze:
+	case vardef.TiDBEnableAutoAnalyze:
 		return "- Determines whether TiDB automatically updates table statistics as a background operation\n" +
 		"- This setting was previously a tidb.toml option (`performance.run-auto-analyze`), but changed to a system variable starting from TiDB 6.1."
-	case variable.TiDBEnableBatchDML:
+	case vardef.TiDBEnableBatchDML:
 		return "- Determines if TiDB permits non-transactional 'batched' statements. Only the value of `OFF` can be considered safe, as batch DML does not provide ACID guarantees.\n" +
 		"- This setting was previously a tidb.toml option (`enable-batch-dml`), but changed to a system variable starting from TiDB 6.1."
-	case variable.TiDBEnablePrepPlanCache:
+	case vardef.TiDBEnablePrepPlanCache:
 		return "- Determines whether to enable Plan Cache of the `PREPARE` statement.\n" +
 		"- This setting was previously a tidb.toml option (`prepared-plan-cache.enabled`), but changed to a system variable starting from TiDB 6.1."
-	case variable.TiDBMemOOMAction:
+	case vardef.TiDBMemOOMAction:
 		return "- Specifies what operation TiDB performs when a single SQL statement exceeds the memory quota specified by `tidb_mem_quota_query` and cannot be spilled over to disk. See [TiDB Memory Control](/configure-memory-usage.md) for details.\n" +
 "- The default value is `CANCEL`, but in TiDB v4.0.2 and earlier versions, the default value is `LOG`.\n" +
 		"- This setting was previously a tidb.toml option (`oom-action`), but changed to a system variable starting from TiDB 6.1."
-	case variable.TiDBPrepPlanCacheMemoryGuardRatio:
+	case vardef.TiDBPrepPlanCacheMemoryGuardRatio:
 		return "- This setting is used to prevent the tidb.toml option `performance.max-memory` from being exceeded. When `max-memory` * (1 - `tidb_prepared_plan_cache_memory_guard_ratio`) is exceeded, the elements in the LRU are removed.\n" + 
 		"- This setting was previously a tidb.toml option (`prepared-plan-cache.memory-guard-ratio`), but changed to a system variable starting from TiDB 6.1."
-	case variable.TiDBPrepPlanCacheSize:
+	case vardef.TiDBPrepPlanCacheSize:
 		return "- The maximum number of statements that can be cached in the prepared plan cache.\n" +
 		"- This setting was previously a tidb.toml option (`prepared-plan-cache.capacity`), but changed to a system variable starting from TiDB 6.1."
 	default:
@@ -1167,12 +1146,12 @@ func main() {
 		// Is there a warning such as deprecatd or experimental?
 		fmt.Print(printWarning(sv))
 
-		if sv.Name == variable.TxnIsolation {
+		if sv.Name == vardef.TxnIsolation {
 			fmt.Println("This variable is an alias for `transaction_isolation`.")
 			fmt.Println("")
 			continue
 		}
-		if sv.Name == variable.Identity {
+		if sv.Name == vardef.Identity {
 			fmt.Println("This variable is an alias for `last_insert_id`.")
 			fmt.Println("")
 			continue
@@ -1187,19 +1166,19 @@ func main() {
 
 		fmt.Printf("- Default value: %s\n", formatDefaultValue(sv))
 
-		if sv.Type == variable.TypeDuration {
+		if sv.Type == vardef.TypeDuration {
 			min := time.Duration(sv.MinValue)
 			max := time.Duration(sv.MaxValue)
 			fmt.Printf("- Range: `[%s, %s]`\n", fmtDuration(min), fmtDuration(max))
 		}
 
 		// If the type is an integer, always print the range
-		if sv.Type == variable.TypeInt || sv.Type == variable.TypeUnsigned {
+		if sv.Type == vardef.TypeInt || sv.Type == vardef.TypeUnsigned {
 			fmt.Printf("- Range: `[%d, %d]`\n", sv.MinValue, sv.MaxValue)
 		}
 
 		// If it's an ENUM, always print the possible values.
-		if sv.Type == variable.TypeEnum {
+		if sv.Type == vardef.TypeEnum {
 			fmt.Printf("- Possible values: %s\n", formatPossibleValues(sv))
 		}
 
@@ -1208,7 +1187,7 @@ func main() {
 		// This is the main description
 		fmt.Println(getExtendedDescription(sv))
 
-		if sv.Name != variable.WindowingUseHighPrecision {
+		if sv.Name != vardef.WindowingUseHighPrecision {
 			fmt.Print("\n")
 		}
 
